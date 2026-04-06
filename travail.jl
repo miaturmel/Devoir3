@@ -18,7 +18,7 @@
  
 # # Implémentation
 
-using CairoMakie 
+using CairoMakie
 CairoMakie.activate!(px_per_unit=6.0)
 using StatsBase, Random
 import UUIDs
@@ -106,11 +106,11 @@ function simulation(; maxlength::Int64=1000, population_size::Int64=3750, interv
     morts_totaux::Int64 = 0
     tick::Int64 = 0
 
-    S_count = Int64[]
-    I_count = Int64[]
-    D_count = Int64[]
-    V_count = Int64[]
-    budget_count = Float64[]
+    S = Int64[]
+    I = Int64[]
+    D = Int64[]
+    V = Int64[]
+    budget_hist = Float64[]
     events = InfectionEvent[]
 
     while !isempty(infectious(population)) && tick < maxlength
@@ -124,8 +124,8 @@ function simulation(; maxlength::Int64=1000, population_size::Int64=3750, interv
         # Infection
         infectieux_du_jour = Random.shuffle(infectious(population))
         for agent in infectieux_du_jour
-            voisins = healthy(incell(agent, population))
-            for v in voisins
+            neighbors = healthy(incell(agent, population))
+            for v in neighbors
                 est_protege = v.vaccinated && v.vax_timer <= 0
                 if !est_protege && !v.infectious && rand() <= 0.4
                     v.infectious = true
@@ -185,20 +185,20 @@ function simulation(; maxlength::Int64=1000, population_size::Int64=3750, interv
         end
 
         # Store statistics
-        push!(S_count, Int64(length(healthy(population))))
-        push!(I_count, Int64(length(infectious(population))))
-        push!(D_count, morts_totaux)
-        push!(V_count, Int64(count(a -> a.vaccinated, population)))
-        push!(budget_count, budget)
+        push!(S, Int64(length(healthy(population))))
+        push!(I, Int64(length(infectious(population))))
+        push!(D, morts_totaux)
+        push!(V, Int64(count(a -> a.vaccinated, population)))
+        push!(budget_hist, budget)
     end
 
     return (
         tick = tick,
-        S_count = S_count,
-        I_count = I_count,
-        D_count = D_count,
-        V_count = V_count,
-        budget_count = budget_count,
+        S = S,
+        I = I,
+        D = D,
+        V = V,
+        budget_hist = budget_hist,
         morts_totaux = morts_totaux,
         budget_restant = budget,
         survivants = Int64(length(population)),
@@ -270,10 +270,10 @@ ax1 = Axis(f1[1, 1],
     ylabel="Population",
     title="Évolution de l'épidémie avec intervention"
 )
-stairs!(ax1, 1:length(resultats_avec.S_count), resultats_avec.S_count, label="Susceptibles", color=:black)
-stairs!(ax1, 1:length(resultats_avec.I_count), resultats_avec.I_count, label="Infectieux", color=:red)
-stairs!(ax1, 1:length(resultats_avec.V_count), resultats_avec.V_count, label="Vaccinés", color=:blue)
-stairs!(ax1, 1:length(resultats_avec.D_count), resultats_avec.D_count, label="Décès cumulés", color=:orange)
+stairs!(ax1, 1:length(resultats_avec.S), resultats_avec.S, label="Susceptibles", color=:black)
+stairs!(ax1, 1:length(resultats_avec.I), resultats_avec.I, label="Infectieux", color=:red)
+stairs!(ax1, 1:length(resultats_avec.V), resultats_avec.V, label="Vaccinés", color=:blue)
+stairs!(ax1, 1:length(resultats_avec.D), resultats_avec.D, label="Décès cumulés", color=:orange)
 axislegend(ax1)
 display(f1)
 
@@ -283,7 +283,7 @@ ax2 = Axis(f2[1, 1],
     ylabel="Budget restant (\$)",
     title="Utilisation du budget pendant l'intervention"
 )
-lines!(ax2, 1:length(resultats_avec.budget_count), resultats_avec.budget_count, color=:green)
+lines!(ax2, 1:length(resultats_avec.budget_hist), resultats_avec.budget_hist, color=:green)
 display(f2)
 
 f3 = Figure(size=(900, 600))
@@ -354,7 +354,6 @@ if !isempty(events)
     scatter!(ax7, t, ys, color=:black)
     display(f7)
 end
-
 
 
 
