@@ -359,7 +359,38 @@ end
 
 
 # # Discussion
+# 1. Types & Structs
+# Changement : clock augmenté de 20 → 21
+# Ajout : vaccinated, vax_timer, is_detected
+# Changement : Lattice ±50 au lieu de ±25
 
+# 2. Population Generation
+# Changement : génération avec comprehension
+
+# 3. Movement
+# Changement : torus=false par défaut, clamp
+
+# 4. Infection
+# Ajout : Protection vaccin
+# Changement : reset clock à 21
+
+# 5. Survie / Mortalité
+# Changement : décrément seulement infectieux non protégés
+# Chnagement : suivi morts_totaux
+
+# 6. Intervention
+# Nouveau : détection RAT + vaccination + budget
+
+# 7. Statistiques
+# Ajout : suivi V_count et budget_count
+
+# 8. Réplications
+# Nouveau : réplications + moyennes/écarts-types
+
+# 9. Plotting
+# Ajout : plots V/D, budget, hotspots, propagation x/y
+
+"""
 # On peut aussi citer des références dans le document `references.bib`, qui doit
 # être au format BibTeX. Les références peuvent être citées dans le texte avec
 # `@` suivi de la clé de citation. Par exemple: @ermentrout1993cellular -- la
