@@ -355,7 +355,20 @@ if !isempty(events)
     display(f7)
 end
 
+# Résultat 
+# === COMPARAISON SIMPLE ===
+# Sans intervention - morts: 2808
+# Avec intervention - morts: 443
+# Réduction de mortalité: 2365
+# Coût de la campagne: 20999.0
 
+# === RÉPLICATIONS (30) ===
+# Sans intervention - morts moyens: 2485.57 ± 996.02
+# Avec intervention - morts moyens: 627.4 ± 421.22
+# Sans intervention - survivants moyens: 1264.43 ± 996.02
+# Avec intervention - survivants moyens: 3122.6 ± 421.22
+# Budget moyen utilisé: 19347.63 ± 5366.95
+# Durée moyenne avec intervention: 748.8 ± 379.38
 
 # # Discussion
 # 1. Types & Structs
