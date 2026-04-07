@@ -271,7 +271,7 @@ stairs!(ax1, 1:length(resultats_avec.I), resultats_avec.I, label="Infectieux", c
 stairs!(ax1, 1:length(resultats_avec.V), resultats_avec.V, label="Vaccinés", color=:blue)
 stairs!(ax1, 1:length(resultats_avec.D), resultats_avec.D, label="Décès cumulés", color=:orange)
 axislegend(ax1)
-display(f1)
+current_figure()
 
 # Budget restant au fil du temps
 
