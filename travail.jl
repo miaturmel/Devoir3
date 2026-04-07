@@ -1,15 +1,19 @@
 # ---
-# title: Titre du travail
-# repository: tpoisot/BIO245-modele
+# title: Simulation d'un campagne de vaccination
+# repository: miaturmel/Devoir3
 # auteurs:
-#    - nom: Auteur
-#      prenom: Premier
+#    - nom: Gomez Saucedo
+#      prenom: Carla Danahe
 #      matricule: XXXXXXXX
-#      github: premierAuteur
-#    - nom: Auteur
-#      prenom: Deuxième
-#      matricule: XXXXXXXX
-#      github: DeuxiAut
+#      github: CarlaGomez1
+#    - nom: Modibo Koné
+#      prenom: Maimouna
+#      matricule: 20234378
+#      github: mkone
+#    - nom: Turmel
+#      prenom: Mia
+#      matricule: 20277557
+#      github: miaturmel
 # ---
 
 # # Introduction
@@ -33,7 +37,49 @@ import UUIDs ## Permet de générer des ID uniques.
 
 Random.seed!(2045) ## Garantit des résultats reproductibles.
 
-include("code/01_types.jl")
+# Base.@kwdef mutable struct permet de créer une structure mutable qui peut être initialisée avec des valeurs spécifiques.
+# Ici, la taille du Landscape est établie.
+
+Base.@kwdef mutable struct Landscape
+    xmin::Int64 = -50
+    xmax::Int64 = 50
+    ymin::Int64 = -50
+    ymax::Int64 = 50
+end
+
+# Ici, les caractéristiques de départ de l'agent (individus de la population) sont établies.
+
+Base.@kwdef mutable struct Agent
+    ## Position
+    x::Int64 = 0 
+    y::Int64 = 0
+    ## Horloge interne de l'agent
+    clock::Int64 = 21
+    ## Indique si l’agent est infectieux 
+    infectious::Bool = false
+    ## Indique si l’agent est vacciné
+    vaccinated::Bool = false
+    ## Indique quand le vaccin prend effet (pour ce code, il prend effet après 2 jours)
+    vax_timer::Int64 = 2
+    ## Indique si l’agent a été détecté comme infecté
+    is_detected::Bool = false
+    ## ID unique attribué à chaque agent
+    id::UUIDs.UUID = UUIDs.uuid4()
+end
+
+# Ici, les caractéristiques de l'événement de transmission de l’infection sont établies.
+
+Base.@kwdef struct InfectionEvent
+    ## ID de l’agent ayant transmis l’infection
+    from::UUIDs.UUID
+    ## ID de l’agent ayant reçu l’infection
+    to::UUIDs.UUID
+    ## Moment où la transmission a eu lieu dans la simulation
+    time::Int64
+    ## Position où la transmission a eu lieu
+    x::Int64
+    y::Int64
+end
 
 # Pour ce code, la population est un vecteur contenant plusieurs agents.
 
@@ -232,12 +278,12 @@ end
 
 # ## Simulations avec et sans intervention et collecte des événements
 
-resultats_sans = simulation(intervention=false)
-resultats_avec = simulation(intervention=true)
-events = resultats_avec.events
+resultats_sans = simulation(intervention=false);
+resultats_avec = simulation(intervention=true);
+events = resultats_avec.events;
 
-rep_sans = replicate_simulations(Int64(30), intervention=false)
-rep_avec = replicate_simulations(Int64(30), intervention=true)
+rep_sans = replicate_simulations(Int64(30), intervention=false);
+rep_avec = replicate_simulations(Int64(30), intervention=true);
 
 # ## Interprétation des résultats comparatifs et statistiques
 
@@ -282,7 +328,7 @@ ax2 = Axis(f2[1, 1],
     title="Utilisation du budget pendant l'intervention"
 )
 lines!(ax2, 1:length(resultats_avec.budget_hist), resultats_avec.budget_hist, color=:green)
-display(f2)
+current_figure()
 
 # Comparaison des morts sur toutes les réplications
 
@@ -295,7 +341,7 @@ ax3 = Axis(f3[1, 1],
 scatter!(ax3, 1:length(rep_sans.morts), rep_sans.morts, label="Sans intervention")
 scatter!(ax3, 1:length(rep_avec.morts), rep_avec.morts, label="Avec intervention")
 axislegend(ax3)
-display(f3)
+current_figure()
 
 # Graphiques basés sur les événements d'infection
 
@@ -312,7 +358,7 @@ if !isempty(events)
     xvals = sort(collect(keys(nb_inxfn)))
     yvals = [nb_inxfn[x] for x in xvals]
     scatterlines!(ax4, xvals, yvals, color=:black)
-    display(f4)
+    current_figure()
 
     ## Positions et temps des infections
     t = getfield.(events, :time)
@@ -338,7 +384,7 @@ if !isempty(events)
         markersize=8
     )
     Colorbar(f5[1, 2], hm, label="Temps d'infection")
-    display(f5)
+    current_figure()
 
     ## Propagation des infections sur l’axe x
     f6 = Figure(size=(900, 600))
@@ -348,7 +394,7 @@ if !isempty(events)
         title="Propagation des infections sur l'axe x"
     )
     scatter!(ax6, t, xs, color=:black)
-    display(f6)
+    current_figure()
 
     ## Propagation des infections sur l’axe y
     f7 = Figure(size=(900, 600))
@@ -358,7 +404,7 @@ if !isempty(events)
         title="Propagation des infections sur l'axe y"
     )
     scatter!(ax7, t, ys, color=:black)
-    display(f7)
+    current_figure()
 end
 
 # # Résultats 
