@@ -452,7 +452,6 @@ end
 # 9. Plotting
 # Ajout : plots V/D, budget, hotspots, propagation x/y
 
-"""
 # On peut aussi citer des références dans le document `references.bib`, qui doit
 # être au format BibTeX. Les références peuvent être citées dans le texte avec
 # `@` suivi de la clé de citation. Par exemple: ermentrout1993cellular -- la
