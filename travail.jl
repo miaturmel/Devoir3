@@ -18,16 +18,18 @@
  
 # # Implémentation
 
-using CairoMakie
-CairoMakie.activate!(px_per_unit=6.0)
-using StatsBase, Random
-import UUIDs
+# Les packages nécessaires pour simuler le code.
+using CairoMakie # Pour créer des graphiques.
+CairoMakie.activate!(px_per_unit=6.0) # Activation de CairoMakie comme moteur d’affichage graphique.
+# px_per_unit=6.0 augmente la résolution des figures.
+using StatsBase # Fournit des fonctions statistiques (tirage aléatoire avec probabilités).
+using Random # Génère des nombres aléatoires.
+import UUIDs # Permet de générer des ID uniques.
 
-Random.seed!(2045)
+Random.seed!(2045) # Garantit des résultats reproductibles.
 
-# ----------------------------
-# Types
-# ----------------------------
+# Base.@kwdef mutable struct permet de créer une structure mutable qui peut être initialisée avec des valeurs spécifiques.
+# Ici, la taille du Landscape est établie.
 Base.@kwdef mutable struct Landscape
     xmin::Int64 = -50
     xmax::Int64 = 50
@@ -35,46 +37,60 @@ Base.@kwdef mutable struct Landscape
     ymax::Int64 = 50
 end
 
+# Ici, les caractéristiques de départ de l'agent (individus de la population) sont établies.
 Base.@kwdef mutable struct Agent
-    x::Int64 = 0
+    # Position
+    x::Int64 = 0 
     y::Int64 = 0
+    # Horloge interne de l'agent
     clock::Int64 = 21
+    # Indique si l’agent est infectieux 
     infectious::Bool = false
+    # Indique si l’agent est vacciné
     vaccinated::Bool = false
+    # Indique quand le vaccin prend effet (pour ce code, il prend effet après 2 jours)
     vax_timer::Int64 = 2
+    # Indique si l’agent a été détecté comme infecté
     is_detected::Bool = false
+    # ID unique attribué à chaque agent
     id::UUIDs.UUID = UUIDs.uuid4()
 end
 
+# Ici, les caractéristiques de l'événement de transmission de l’infection sont établies.
 Base.@kwdef struct InfectionEvent
+    # ID de l’agent ayant transmis l’infection
     from::UUIDs.UUID
+    # ID de l’agent ayant reçu l’infection
     to::UUIDs.UUID
+    # Moment où la transmission a eu lieu dans la simulation
     time::Int64
+    # Position où la transmission a eu lieu
     x::Int64
     y::Int64
 end
 
+# Pour ce code, la population est un vecteur contenant plusieurs agents.
 const Population = Vector{Agent}
 
-# ----------------------------
-# Random agent generation
-# ----------------------------
+# Ceci permet de générer un agent aléatoire dans un paysage (Landscape) donné
+# et de lui assigner une position aléatoire à l’intérieur des limites du Landscape.
 Random.rand(::Type{Agent}, L::Landscape) = Agent(
     x = rand(L.xmin:L.xmax),
     y = rand(L.ymin:L.ymax)
 )
 
-# ----------------------------
-# Movement function
-# ----------------------------
+# Ceci permet de déplacer un agent (A) dans le Landscape (L)
 function move!(A::Agent, L::Landscape; torus=false)
+    # Déplacement limité de l'agent
     A.x += rand(Int64(-1):Int64(1))
     A.y += rand(Int64(-1):Int64(1))
+    # Grâce à la fonction torus, si l'agent atteint la bordure du Landscape, il est renvoyé de l’autre côté
     if torus
         A.y = A.y < L.ymin ? L.ymax : A.y
         A.x = A.x < L.xmin ? L.xmax : A.x
         A.y = A.y > L.ymax ? L.ymin : A.y
         A.x = A.x > L.xmax ? L.xmin : A.x
+    # Sinon, l’agent reste à l’intérieur des limites du Landscape
     else
         A.y = clamp(A.y, L.ymin, L.ymax)
         A.x = clamp(A.x, L.xmin, L.xmax)
@@ -82,30 +98,31 @@ function move!(A::Agent, L::Landscape; torus=false)
     return A
 end
 
-# ----------------------------
-# Population queries
-# ----------------------------
+# Vérifie l'état de l'agent (infectieux ou en santé)
 isinfectious(agent::Agent) = agent.infectious
 ishealthy(agent::Agent) = !agent.infectious
-
+# Filtre la population pour ne garder que les agents infectieux ou sains
 infectious(pop::Population) = filter(isinfectious, pop)
 healthy(pop::Population) = filter(ishealthy, pop)
+# incell(target, pop) analyse les agents de la population
+# et renvoie seulement ceux qui sont aux mêmes coordonnées x et y
 incell(target::Agent, pop::Population) = filter(ag -> (ag.x == target.x && ag.y == target.y), pop)
 
-# ----------------------------
-# Simulation
-# ----------------------------
+# Crée le Landscape où vivent les agents
 function simulation(; maxlength::Int64=1000, population_size::Int64=3750, intervention=true)
     L = Landscape()
+    # Un agent est choisi au hasard pour qu'il soit infectieux au départ
     population = [rand(Agent, L) for _ in 1:population_size]
     rand(population).infectious = true
 
+    # Budget et coûts de départ
     budget::Float64 = 21000.0
     cout_vax::Float64 = 17.0
     cout_rat::Float64 = 4.0
     morts_totaux::Int64 = 0
     tick::Int64 = 0
 
+    # Stocke les infos de la simulation à chaque étape (nombres de sains, infectés, morts, etc. à chaque tick)
     S = Int64[]
     I = Int64[]
     D = Int64[]
@@ -113,23 +130,27 @@ function simulation(; maxlength::Int64=1000, population_size::Int64=3750, interv
     budget_hist = Float64[]
     events = InfectionEvent[]
 
+    # Boucle principale de la simulation (un tick correspond à une étape)
     while !isempty(infectious(population)) && tick < maxlength
-        tick += 1
+        tick += 1 
 
-        # Movement
+        # Déplacement des agents
         for agent in population
             move!(agent, L; torus=false)
         end
 
-        # Infection
+        # Établir un ordre aléatoire des infectieux
         infectieux_du_jour = Random.shuffle(infectious(population))
         for agent in infectieux_du_jour
+            # Déterminer tous les voisins sains sur la même cellule
             neighbors = healthy(incell(agent, population))
             for v in neighbors
                 est_protege = v.vaccinated && v.vax_timer <= 0
                 if !est_protege && !v.infectious && rand() <= 0.4
+                    # Si non protégé, non infectieux et probabilité < 0.4, l'agent devient infectieux
                     v.infectious = true
-                    v.clock = 21
+                    # Durée de l'infection et enregistrement de l'événement
+                    v.clock = 21 
                     push!(events, InfectionEvent(
                         from = agent.id,
                         to = v.id,
@@ -141,14 +162,14 @@ function simulation(; maxlength::Int64=1000, population_size::Int64=3750, interv
             end
         end
 
-        # Vaccination timer update
+        # Délai avant l'effet du vaccin
         for agent in population
             if agent.vaccinated && agent.vax_timer > 0
                 agent.vax_timer -= 1
             end
         end
 
-        # Survival update
+        # Compte à rebours jusqu'à la mort
         for agent in population
             est_protege = agent.vaccinated && agent.vax_timer <= 0
             if agent.infectious && !est_protege
@@ -156,16 +177,17 @@ function simulation(; maxlength::Int64=1000, population_size::Int64=3750, interv
             end
         end
 
-        # Remove dead agents
+        # Supprime les agents morts
         morts_step = count(a -> a.clock <= 0, population)
         morts_totaux += morts_step
         population = filter(a -> a.clock > 0, population)
 
-        # Intervention (vaccination + detection)
+        # Intervention (vaccination et détection)
         if intervention && morts_totaux > 0 && budget > 0 && !isempty(population)
             n = min(Int64(20), Int64(length(population)))
             cibles = StatsBase.sample(population, n; replace=false)
 
+            # Détecte les infectieux avec 95 % de chance (test RAT)
             for a in cibles
                 if budget >= cout_rat
                     budget -= cout_rat
@@ -173,8 +195,8 @@ function simulation(; maxlength::Int64=1000, population_size::Int64=3750, interv
                 end
             end
 
+            # Vaccination des agents sains restants (délai de 2 jours avant que le vaccin devienne actif)
             a_vacciner = filter(a -> !a.infectious && !a.vaccinated, cibles)
-
             for a in a_vacciner
                 if budget >= cout_vax
                     budget -= cout_vax
@@ -184,7 +206,7 @@ function simulation(; maxlength::Int64=1000, population_size::Int64=3750, interv
             end
         end
 
-        # Store statistics
+        # Enregistre les données à chaque tick
         push!(S, Int64(length(healthy(population))))
         push!(I, Int64(length(infectious(population))))
         push!(D, morts_totaux)
@@ -192,36 +214,35 @@ function simulation(; maxlength::Int64=1000, population_size::Int64=3750, interv
         push!(budget_hist, budget)
     end
 
+    # Retourne les résultats de la simulation
     return (
-        tick = tick,
-        S = S,
-        I = I,
-        D = D,
-        V = V,
-        budget_hist = budget_hist,
-        morts_totaux = morts_totaux,
-        budget_restant = budget,
-        survivants = Int64(length(population)),
-        events = events
+        tick = tick,  
+        S = S,  
+        I = I,  
+        D = D, 
+        V = V, 
+        budget_hist = budget_hist,  
+        morts_totaux = morts_totaux,  
+        budget_restant = budget,  
+        survivants = Int64(length(population)), 
+        events = events 
     )
 end
 
-# ----------------------------
-# Replicate simulations
-# ----------------------------
+# Fonction pour répéter la simulation plusieurs fois et extraire les données pour comparaison
 function replicate_simulations(nrep::Int64; intervention=true)
     results = [simulation(intervention=intervention) for _ in 1:nrep]
     morts = [r.morts_totaux for r in results]
     survivants = [r.survivants for r in results]
     budgets = [21000.0 - r.budget_restant for r in results]
     durations = [r.tick for r in results]
-
+    # Moyennes et écarts-types pour comparaison
     return (
-        results = results,
-        morts = morts,
-        survivants = survivants,
-        budgets = budgets,
-        durations = durations,
+        results = results,  
+        morts = morts,  
+        survivants = survivants,  
+        budgets = budgets, 
+        durations = durations, 
         mean_morts = mean(morts),
         std_morts = std(morts),
         mean_survivants = mean(survivants),
@@ -233,9 +254,7 @@ function replicate_simulations(nrep::Int64; intervention=true)
     )
 end
 
-# ----------------------------
-# Run simulations
-# ----------------------------
+# Simulations avec et sans intervention et collecte des événements
 resultats_sans = simulation(intervention=false)
 resultats_avec = simulation(intervention=true)
 events = resultats_avec.events
@@ -243,9 +262,7 @@ events = resultats_avec.events
 rep_sans = replicate_simulations(Int64(30), intervention=false)
 rep_avec = replicate_simulations(Int64(30), intervention=true)
 
-# ----------------------------
-# Print summary
-# ----------------------------
+# Interprétation des résultats comparatifs et statistiques
 println("=== COMPARAISON SIMPLE ===")
 println("Sans intervention - morts: ", resultats_sans.morts_totaux)
 println("Avec intervention - morts: ", resultats_avec.morts_totaux)
@@ -261,9 +278,9 @@ println("Avec intervention - survivants moyens: ", round(rep_avec.mean_survivant
 println("Budget moyen utilisé: ", round(rep_avec.mean_budget, digits=2), " ± ", round(rep_avec.std_budget, digits=2))
 println("Durée moyenne avec intervention: ", round(rep_avec.mean_duration, digits=2), " ± ", round(rep_avec.std_duration, digits=2))
 
-# ----------------------------
-# Plotting
-# ----------------------------
+# Graphiques pour visualiser les résultats
+
+# Évolution de la population
 f1 = Figure(size=(900, 600))
 ax1 = Axis(f1[1, 1],
     xlabel="Génération",
@@ -277,6 +294,7 @@ stairs!(ax1, 1:length(resultats_avec.D), resultats_avec.D, label="Décès cumul�
 axislegend(ax1)
 display(f1)
 
+# Budget restant au fil du temps
 f2 = Figure(size=(900, 600))
 ax2 = Axis(f2[1, 1],
     xlabel="Génération",
@@ -286,6 +304,7 @@ ax2 = Axis(f2[1, 1],
 lines!(ax2, 1:length(resultats_avec.budget_hist), resultats_avec.budget_hist, color=:green)
 display(f2)
 
+# Comparaison des morts sur toutes les réplications
 f3 = Figure(size=(900, 600))
 ax3 = Axis(f3[1, 1],
     xlabel="Répétition",
@@ -297,6 +316,7 @@ scatter!(ax3, 1:length(rep_avec.morts), rep_avec.morts, label="Avec intervention
 axislegend(ax3)
 display(f3)
 
+# Graphiques basés sur les événements d'infection
 if !isempty(events)
     infxn_by_uuid = countmap(getfield.(events, :from))
     nb_inxfn = countmap(collect(values(infxn_by_uuid)))
@@ -312,10 +332,12 @@ if !isempty(events)
     scatterlines!(ax4, xvals, yvals, color=:black)
     display(f4)
 
+    # Positions et temps des infections
     t = getfield.(events, :time)
     xs = getfield.(events, :x)
     ys = getfield.(events, :y)
 
+    # Hotspots des infections
     f5 = Figure(size=(900, 600))
     ax5 = Axis(f5[1, 1],
         aspect=1,
@@ -336,6 +358,7 @@ if !isempty(events)
     Colorbar(f5[1, 2], hm, label="Temps d'infection")
     display(f5)
 
+    # Propagation des infections sur l’axe x
     f6 = Figure(size=(900, 600))
     ax6 = Axis(f6[1, 1],
         xlabel="Temps",
@@ -345,6 +368,7 @@ if !isempty(events)
     scatter!(ax6, t, xs, color=:black)
     display(f6)
 
+    # Propagation des infections sur l’axe y
     f7 = Figure(size=(900, 600))
     ax7 = Axis(f7[1, 1],
         xlabel="Temps",
