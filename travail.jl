@@ -103,7 +103,7 @@ Le sens du déplacement est aléatoirement défini entre -1 et 1 sur les deux ax
 Si activé, le keyword de la fonction permet que l'agent réapparait de l'autre coté de la lattice
 s'il en dépasse les bordures. 
 
-# Arguments et keyword
+## Arguments et keyword:
 A::Agent : identité de l'agent qui subit le déplacement 
 L::Landscape : lattice sur laquelle l'agent se déplace
 keyword : permet de définir la lattice comme un environnement toroidal. 
@@ -111,7 +111,7 @@ keyword : permet de définir la lattice comme un environnement toroidal.
         il revient de l'autre coté.
     - Si false : l'agent est contraint aux limites du landscape
 
-# Retour
+## Retour:
 La fonction retourne la position de l'agent modifiée.
 """
 function move!(A::Agent, L::Landscape; torus=false)
@@ -139,10 +139,10 @@ end
 
 Indique si un agent est infectieux ou non à l'aide de valeurs Booléennes.
 
-# Arguments 
+## Arguments 
 agent::Agent : identité de l'agent dont on vérifie l'état d'infection
 
-# Retour
+## Retour
 La fonction retourne une valeur Booléennes : true si l'agent est infectieux, false si non.
 """
 isinfectious(agent::Agent) = agent.infectious
@@ -152,10 +152,10 @@ isinfectious(agent::Agent) = agent.infectious
 
 Indique si un agent est sain ou non à l'aide de valeurs Booléennes, en comparant l'état de l'agent au contraire de 'agent.infectious'.
 
-# Arguments 
+## Arguments 
 agent::Agent : identité de l'agent dont on vérifie l'état d'infection
 
-# Retour
+## Retour
 La fonction retourne une valeur Booléennes : true si agent.infectious == false, false si agent.infectious == true.
 """
 ishealthy(agent::Agent) = !agent.infectious
@@ -168,10 +168,10 @@ ishealthy(agent::Agent) = !agent.infectious
 Retourne les agents infectieux d'une population en filtrant la population contenant tous les agents pour ne garder que les 
 agents infectieux.
 
-# Arguments 
+## Arguments 
 pop::Population = la population contenant tous les agents (infectieux et sains)
 
-# Retour
+## Retour
 La fonction retourne une collection contenant uniquement les agents infectieux de la population.
 """
 infectious(pop::Population) = filter(isinfectious, pop)
@@ -182,10 +182,10 @@ infectious(pop::Population) = filter(isinfectious, pop)
 Retourne les agents sains d'une population en filtrant la population contenant tous les agents pour ne garder que les 
 agents sains.
 
-# Arguments 
+## Arguments 
 pop::Population = la population contenant tous les agents (infectieux et sains)
 
-# Retour
+## Retour
 La fonction retourne une collection contenant uniquement les agents sains de la population.
 """
 healthy(pop::Population) = filter(ishealthy, pop)
@@ -199,11 +199,11 @@ healthy(pop::Population) = filter(ishealthy, pop)
 Identifie un agent spécifique, puis vérifie les agents qui occupent la même cellule dans le Landscape que cet agent d'intéret.
 La fonction retourne ensuite toutes les positions sur les axes x et y de ces agents.
 
-# Arguments 
+## Arguments 
 target::Agent : un agent spécifique à qui la fonction compare la position avec les autres agents de la population
 pop::Population : la population contenant tous les agents (infectieux et sains)
 
-# Retour
+## Retour
 La fonction retourne une collection contenant uniquement les agents dont les coordonnées sur les axes x et y sont les même
     que l'agent target.
 """
@@ -214,7 +214,7 @@ incell(target::Agent, pop::Population) = filter(ag -> (ag.x == target.x && ag.y 
 """
     simulation(; maxlength::Int64=1000, population_size::Int64=3750, intervention=true)
 
-# Description 
+## Description 
 1. La fonction établie le Landscape dans lequel la population évolue.
 2. Génération de la population contenant tous les agents au départ. 
 3. Échantillonnage d'un individu spécifique qui sera le premier individu infectieux.
@@ -227,13 +227,13 @@ incell(target::Agent, pop::Population) = filter(ag -> (ag.x == target.x && ag.y 
 7. L'intervention est simulée : une groupe de 20 agents sont sélectionnés aléatoirement,
     ils se font tester et certains se font vacciner.
 
-# Arguments ou keywords 
+## Arguments ou keywords 
 maxlength::Int64=1000 : nombre maximal de ticks ou pas de temps simulés
 population_size::Int64=3750 : taille de la population initiale 
 intervention=true : active ou non l'intervention. Si true, l'intervention est activée et les RAT et la vaccination sont mis en place.
     Si false, l'intervention n'a pas lieu.
 
-# Retour
+## Retour
 La fonction retourne retourne un NamedTuple qui contient:
     - tick = le nombre total de ticks simulés
     - S = historique desvagents sains
@@ -374,12 +374,12 @@ end
 La fonction effectue plusieurs répétition de la simulation d'infection et collecte des
 statistiques pour l'analyse.
 
-# Arguments 
+## Arguments 
 nrep::Int6 : nombre de répétitions de la simulation à effectuer
 intervention=true : active ou non l'intervention. Si true, l'intervention est activée et les RAT et la vaccination sont mis en place.
     Si false, l'intervention n'a pas lieu.
 
-# Retour
+## Retour
 La fonction retourne retourne un NamedTuple qui contient:
     - results : résultats complets de chaque simulation
     - morts : nombre total de morts par simulation
