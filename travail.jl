@@ -100,13 +100,13 @@ Random.rand(::Type{Agent}, L::Landscape) = Agent(
 
 Déplace un agent aléatoirement d\'un pas de taille 1 dans les deux dimension x et y. 
 Le sens du déplacement est aléatoirement défini entre -1 et 1 sur les deux axes.
-L\'argument \'torus\', si activé, permet que l\'agent réapparaît de l\'autre côté de la Lattice
+Si activé, le keyword de la fonction permet que l\'agent réapparaît de l\'autre côté de la Lattice
 s\'il en dépasse les bordures. 
 
-# Arguments 
+# Arguments et keyword
 A::Agent : identité de l\'agent qui subit le déplacement 
 L::Landscape : lattice sur laquelle l\'agent se déplace
-torus=false : permet de définir la lattice comme un environnement toroïdal. 
+keyword : permet de définir la lattice comme un environnement toroïdal. 
     - Si true : l\'environnement est toroïdal et si un agent dépasse les limite du landscape, 
         il revient de l\'autre côté.
     - Si false : l\'agent est contraint aux limites du Landscape
