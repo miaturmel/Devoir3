@@ -1,10 +1,10 @@
 # ---
-# title: Simulation d'un campagne de vaccination
+# title: Simulation d'une campagne de vaccination
 # repository: miaturmel/Devoir3
 # auteurs:
 #    - nom: Gomez Saucedo
 #      prenom: Carla Danahe
-#      matricule: XXXXXXXX
+#      matricule: 20341379
 #      github: CarlaGomez1
 #    - nom: Modibo Koné
 #      prenom: Maimouna
@@ -33,7 +33,7 @@ using StatsBase ## Fournit des fonctions statistiques (tirage aléatoire avec pr
 using Random ## Génère des nombres aléatoires.
 import UUIDs ## Permet de générer des ID uniques.
 
-# ## Code
+# # Code
 
 Random.seed!(2045) ## Garantit des résultats reproductibles.
 
@@ -95,6 +95,25 @@ Random.rand(::Type{Agent}, L::Landscape) = Agent(
 
 # Ceci permet de déplacer un agent (A) dans le Landscape (L)
 
+"""
+    move!(A::Agent, L::Landscape; torus=false)
+
+Déplace un agent aléatoirement d'un pas de taille 1 dans les deux dimension x et y. 
+Le sens du déplacement est aléatoirement défini entre -1 et 1 sur les deux axes.
+Si activé, le keyword de la fonction permet que l'agent réapparait de l'autre coté de la lattice
+s'il en dépasse les bordures. 
+
+## Arguments et keyword:
+A::Agent : identité de l'agent qui subit le déplacement 
+L::Landscape : lattice sur laquelle l'agent se déplace
+keyword : permet de définir la lattice comme un environnement toroidal. 
+    - Si true : l'environnement est toroidal et si un agent dépasse les limite du landscape, 
+        il revient de l'autre coté.
+    - Si false : l'agent est contraint aux limites du landscape
+
+## Retour:
+La fonction retourne la position de l'agent modifiée.
+"""
 function move!(A::Agent, L::Landscape; torus=false)
     ## Déplacement limité de l'agent
     A.x += rand(Int64(-1):Int64(1))
@@ -115,21 +134,118 @@ end
 
 # Vérifie l'état de l'agent (infectieux ou en santé)
 
+"""
+    isinfectious(agent::Agent)
+
+Indique si un agent est infectieux ou non à l'aide de valeurs Booléennes.
+
+## Arguments 
+agent::Agent : identité de l'agent dont on vérifie l'état d'infection
+
+## Retour
+La fonction retourne une valeur Booléennes : true si l'agent est infectieux, false si non.
+"""
 isinfectious(agent::Agent) = agent.infectious
+
+"""
+    ishealthy(agent::Agent)
+
+Indique si un agent est sain ou non à l'aide de valeurs Booléennes, en comparant l'état de l'agent au contraire de 'agent.infectious'.
+
+## Arguments 
+agent::Agent : identité de l'agent dont on vérifie l'état d'infection
+
+## Retour
+La fonction retourne une valeur Booléennes : true si agent.infectious == false, false si agent.infectious == true.
+"""
 ishealthy(agent::Agent) = !agent.infectious
 
 # Filtre la population pour ne garder que les agents infectieux ou sains
 
+"""
+    infectious(pop::Population)
+
+Retourne les agents infectieux d'une population en filtrant la population contenant tous les agents pour ne garder que les 
+agents infectieux.
+
+## Arguments 
+pop::Population = la population contenant tous les agents (infectieux et sains)
+
+## Retour
+La fonction retourne une collection contenant uniquement les agents infectieux de la population.
+"""
 infectious(pop::Population) = filter(isinfectious, pop)
+
+"""
+    healthy(pop::Population)
+
+Retourne les agents sains d'une population en filtrant la population contenant tous les agents pour ne garder que les 
+agents sains.
+
+## Arguments 
+pop::Population = la population contenant tous les agents (infectieux et sains)
+
+## Retour
+La fonction retourne une collection contenant uniquement les agents sains de la population.
+"""
 healthy(pop::Population) = filter(ishealthy, pop)
 
 # incell(target, pop) analyse les agents de la population
 # et renvoie seulement ceux qui sont aux mêmes coordonnées x et y
 
+"""
+    incell(target::Agent, pop::Population)
+
+Identifie un agent spécifique, puis vérifie les agents qui occupent la même cellule dans le Landscape que cet agent d'intéret.
+La fonction retourne ensuite toutes les positions sur les axes x et y de ces agents.
+
+## Arguments 
+target::Agent : un agent spécifique à qui la fonction compare la position avec les autres agents de la population
+pop::Population : la population contenant tous les agents (infectieux et sains)
+
+## Retour
+La fonction retourne une collection contenant uniquement les agents dont les coordonnées sur les axes x et y sont les même
+    que l'agent target.
+"""
 incell(target::Agent, pop::Population) = filter(ag -> (ag.x == target.x && ag.y == target.y), pop)
 
 # Crée le Landscape où vivent les agents
 
+"""
+    simulation(; maxlength::Int64=1000, population_size::Int64=3750, intervention=true)
+
+## Description 
+1. La fonction établie le Landscape dans lequel la population évolue.
+2. Génération de la population contenant tous les agents au départ. 
+3. Échantillonnage d'un individu spécifique qui sera le premier individu infectieux.
+4. Établissement du budget de départ et des couts relier aux interventions.
+5. À chaque tick, ou pas de temps, les agents de la population subissent un déplacement, 
+    des agents infectieux sont choisi, la propagation de la maladie est générée et une
+    horloge interne de 21 jours est initié qui décompte le temps avant qu'un agent infectieux
+    meurt.
+6. Les agents qui meurt à la fin du délai de 21 jours sont supprimés de la population.
+7. L'intervention est simulée : une groupe de 20 agents sont sélectionnés aléatoirement,
+    ils se font tester et certains se font vacciner.
+
+## Arguments ou keywords 
+maxlength::Int64=1000 : nombre maximal de ticks ou pas de temps simulés
+population_size::Int64=3750 : taille de la population initiale 
+intervention=true : active ou non l'intervention. Si true, l'intervention est activée et les RAT et la vaccination sont mis en place.
+    Si false, l'intervention n'a pas lieu.
+
+## Retour
+La fonction retourne retourne un NamedTuple qui contient:
+    - tick = le nombre total de ticks simulés
+    - S = historique desvagents sains
+    - I = historique des agents infectieux
+    - D = historique des morts cumulées
+    - V = historique des agents vaccinés
+    - budget_hist = l'historique du budget
+    - morts_totaux = nombre total de morts
+    - budget_restant = montant restant du budget initial
+    - survivants = nombre d'agents restant dans la population
+    - events = historique des évènements d'infection
+"""
 function simulation(; maxlength::Int64=1000, population_size::Int64=3750, intervention=true)
     L = Landscape()
     ## Un agent est choisi au hasard pour qu'il soit infectieux au départ
@@ -252,6 +368,33 @@ end
 
 # Fonction pour répéter la simulation plusieurs fois et extraire les données pour comparaison
 
+"""
+    replicate_simulations(nrep::Int64; intervention=true)
+
+La fonction effectue plusieurs répétition de la simulation d'infection et collecte des
+statistiques pour l'analyse.
+
+## Arguments 
+nrep::Int6 : nombre de répétitions de la simulation à effectuer
+intervention=true : active ou non l'intervention. Si true, l'intervention est activée et les RAT et la vaccination sont mis en place.
+    Si false, l'intervention n'a pas lieu.
+
+## Retour
+La fonction retourne retourne un NamedTuple qui contient:
+    - results : résultats complets de chaque simulation
+    - morts : nombre total de morts par simulation
+    - survivants : nombre de survivants par simulation
+    - budgets : budgets dépensés par simulation
+    - durations : durées de chaque simulation (en nombre de tick)
+    - mean_morts : moyenne du nombre de morts
+    - std_morts : écart-type du nombre de morts
+    - mean_survivants : moyenne du nombre de survivants
+    - std_survivants : écart-type des survivants
+    - mean_budget : moyenne du budget dépensé
+    - std_budget : écart-type du budget dépensé
+    - mean_duration : durée moyenne des simulations
+    - std_duration : écart-type de la durée des simulations
+"""
 function replicate_simulations(nrep::Int64; intervention=true)
     results = [simulation(intervention=intervention) for _ in 1:nrep]
     morts = [r.morts_totaux for r in results]
@@ -349,63 +492,68 @@ if !isempty(events)
     infxn_by_uuid = countmap(getfield.(events, :from))
     nb_inxfn = countmap(collect(values(infxn_by_uuid)))
 
-    f4 = Figure(size=(900, 600))
-    ax4 = Axis(f4[1, 1],
-        xlabel="Nombre d'infections",
-        ylabel="Nombre d'agents",
-        title="Distribution du nombre de cas par individu infectieux"
-    )
-    xvals = sort(collect(keys(nb_inxfn)))
-    yvals = [nb_inxfn[x] for x in xvals]
-    scatterlines!(ax4, xvals, yvals, color=:black)
-    current_figure()
-
     ## Positions et temps des infections
     t = getfield.(events, :time)
     xs = getfield.(events, :x)
-    ys = getfield.(events, :y)
-
-    ## Hotspots des infections
-    f5 = Figure(size=(900, 600))
-    ax5 = Axis(f5[1, 1],
-        aspect=1,
-        backgroundcolor=:grey97,
-        title="Hotspots des infections"
-    )
-    hm = scatter!(
-        ax5,
-        xs,
-        ys,
-        color=t,
-        colormap=:viridis,
-        strokecolor=:black,
-        strokewidth=1,
-        colorrange=(0, max(1, resultats_avec.tick)),
-        markersize=8
-    )
-    Colorbar(f5[1, 2], hm, label="Temps d'infection")
-    current_figure()
-
-    ## Propagation des infections sur l’axe x
-    f6 = Figure(size=(900, 600))
-    ax6 = Axis(f6[1, 1],
-        xlabel="Temps",
-        ylabel="Position x",
-        title="Propagation des infections sur l'axe x"
-    )
-    scatter!(ax6, t, xs, color=:black)
-    current_figure()
-
-    ## Propagation des infections sur l’axe y
-    f7 = Figure(size=(900, 600))
-    ax7 = Axis(f7[1, 1],
-        xlabel="Temps",
-        ylabel="Position y",
-        title="Propagation des infections sur l'axe y"
-    )
-    scatter!(ax7, t, ys, color=:black)
-    current_figure()
+    ys = getfield.(events, :y) 
 end
+
+# Nombre de cas par individu infectieux
+
+f4 = Figure(size=(900, 600))
+ax4 = Axis(f4[1, 1],
+    xlabel="Nombre d'infections",
+    ylabel="Nombre d'agents",
+    title="Distribution du nombre de cas par individu infectieux"
+    )
+xvals = sort(collect(keys(nb_inxfn)))
+yvals = [nb_inxfn[x] for x in xvals]
+scatterlines!(ax4, xvals, yvals, color=:black)
+current_figure()
+
+# Hotspots des infections
+
+f5 = Figure(size=(900, 600))
+ax5 = Axis(f5[1, 1],
+     aspect=1,
+    backgroundcolor=:grey97,
+    title="Hotspots des infections"
+    )
+hm = scatter!(
+    ax5,
+    xs,
+    ys,
+    color=t,
+    colormap=:viridis,
+    strokecolor=:black,
+    strokewidth=1,
+    colorrange=(0, max(1, resultats_avec.tick)),
+    markersize=8
+    )
+Colorbar(f5[1, 2], hm, label="Temps d'infection")
+current_figure()
+
+# Propagation des infections sur l’axe x
+
+f6 = Figure(size=(900, 600))
+ax6 = Axis(f6[1, 1],
+    xlabel="Temps",
+    ylabel="Position x",
+    title="Propagation des infections sur l'axe x"
+    )
+scatter!(ax6, t, xs, color=:black)
+current_figure()
+
+# Propagation des infections sur l’axe y
+
+f7 = Figure(size=(900, 600))
+ax7 = Axis(f7[1, 1],
+    xlabel="Temps",
+    ylabel="Position y",
+    title="Propagation des infections sur l'axe y"
+    )
+scatter!(ax7, t, ys, color=:black)
+current_figure()
 
 # # Résultats 
 
@@ -456,9 +604,9 @@ end
 # 9. Plotting
 # Ajout : plots V/D, budget, hotspots, propagation x/y
 
-# On peut aussi citer des références dans le document `references.bib`, qui doit
+# On peut aussi citer des références dans le document 'references.bib', qui doit
 # être au format BibTeX. Les références peuvent être citées dans le texte avec
-# `@` suivi de la clé de citation. Par exemple: ermentrout1993cellular -- la
+# '@' suivi de la clé de citation. Par exemple: ermentrout1993cellular -- la
 # bibliographie sera ajoutée automatiquement à la fin du document.
 
 # Le format de la bibliographie est American Physics Society, et les références
