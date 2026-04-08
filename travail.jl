@@ -100,16 +100,16 @@ Random.rand(::Type{Agent}, L::Landscape) = Agent(
 
 Déplace un agent aléatoirement d\'un pas de taille 1 dans les deux dimension x et y. 
 Le sens du déplacement est aléatoirement défini entre -1 et 1 sur les deux axes.
-Si activé, le keyword de la fonction permet que l\'agent réapparaît de l\'autre côté de la Lattice
+Si activé, le keyword de la fonction permet que l\'agent réapparait de l\'autre coté de la lattice
 s\'il en dépasse les bordures. 
 
 # Arguments et keyword
 A::Agent : identité de l\'agent qui subit le déplacement 
 L::Landscape : lattice sur laquelle l\'agent se déplace
-keyword : permet de définir la lattice comme un environnement toroïdal. 
-    - Si true : l\'environnement est toroïdal et si un agent dépasse les limite du landscape, 
-        il revient de l\'autre côté.
-    - Si false : l\'agent est contraint aux limites du Landscape
+keyword : permet de définir la lattice comme un environnement toroidal. 
+    - Si true : l\'environnement est toroidal et si un agent dépasse les limite du landscape, 
+        il revient de l\'autre coté.
+    - Si false : l\'agent est contraint aux limites du landscape
 
 # Retour
 La fonction retourne la position de l\'agent modifiée.
@@ -196,7 +196,7 @@ healthy(pop::Population) = filter(ishealthy, pop)
 """
     incell(target::Agent, pop::Population)
 
-Identifie un agent spécifique, puis vérifie les agents qui occupent la même cellule dans le Landscape que cet agent d\'intérêt.
+Identifie un agent spécifique, puis vérifie les agents qui occupent la même cellule dans le Landscape que cet agent d\'intéret.
 La fonction retourne ensuite toutes les positions sur les axes x et y de ces agents.
 
 # Arguments 
@@ -218,7 +218,7 @@ incell(target::Agent, pop::Population) = filter(ag -> (ag.x == target.x && ag.y 
 1. La fonction établie le Landscape dans lequel la population évolue.
 2. Génération de la population contenant tous les agents au départ. 
 3. Échantillonnage d\'un individu spécifique qui sera le premier individu infectieux.
-4. Établissement du budget de départ et des coûts relier aux interventions.
+4. Établissement du budget de départ et des couts relier aux interventions.
 5. À chaque tick, ou pas de temps, les agents de la population subissent un déplacement, 
     des agents infectieux sont choisi, la propagation de la maladie est générée et une
     horloge interne de 21 jours est initié qui décompte le temps avant qu\'un agent infectieux
