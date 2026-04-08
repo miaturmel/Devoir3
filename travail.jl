@@ -1,5 +1,5 @@
 # ---
-# title: Simulation d`une campagne de vaccination
+# title: Simulation d'une campagne de vaccination
 # repository: miaturmel/Devoir3
 # auteurs:
 #    - nom: Gomez Saucedo
@@ -47,13 +47,13 @@ Base.@kwdef mutable struct Landscape
     ymax::Int64 = 50
 end
 
-# Ici, les caractéristiques de départ de l`agent (individus de la population) sont établies.
+# Ici, les caractéristiques de départ de l'agent (individus de la population) sont établies.
 
 Base.@kwdef mutable struct Agent
     ## Position
     x::Int64 = 0 
     y::Int64 = 0
-    ## Horloge interne de l`agent
+    ## Horloge interne de l'agent
     clock::Int64 = 21
     ## Indique si l’agent est infectieux 
     infectious::Bool = false
@@ -67,7 +67,7 @@ Base.@kwdef mutable struct Agent
     id::UUIDs.UUID = UUIDs.uuid4()
 end
 
-# Ici, les caractéristiques de l`événement de transmission de l’infection sont établies.
+# Ici, les caractéristiques de l'événement de transmission de l’infection sont établies.
 
 Base.@kwdef struct InfectionEvent
     ## ID de l’agent ayant transmis l’infection
@@ -98,27 +98,27 @@ Random.rand(::Type{Agent}, L::Landscape) = Agent(
 """
     move!(A::Agent, L::Landscape; torus=false)
 
-Déplace un agent aléatoirement d`un pas de taille 1 dans les deux dimension x et y. 
+Déplace un agent aléatoirement d\'un pas de taille 1 dans les deux dimension x et y. 
 Le sens du déplacement est aléatoirement défini entre -1 et 1 sur les deux axes.
-L`argument `torus`, si activé, permet que l`agent réapparaît de l`autre côté de la Lattice
-s`il en dépasse les bordures. 
+L\'argument \'torus\', si activé, permet que l\'agent réapparaît de l\'autre côté de la Lattice
+s\'il en dépasse les bordures. 
 
 # Arguments 
-`A::Agent` : identité de l`agent qui subit le déplacement 
-`L::Landscape` : lattice sur laquelle l`agent se déplace
-`torus=false` : permet de définir la lattice comme un environnement toroïdal. 
-    - Si `true` : l`environnement est toroïdal et si un agent dépasse les limite du landscape, 
-        il revient de l`autre côté.
-    - Si `false` : l`agent est contraint aux limites du Landscape
+A::Agent : identité de l\'agent qui subit le déplacement 
+L::Landscape : lattice sur laquelle l\'agent se déplace
+torus=false : permet de définir la lattice comme un environnement toroïdal. 
+    - Si true : l\'environnement est toroïdal et si un agent dépasse les limite du landscape, 
+        il revient de l\'autre côté.
+    - Si false : l\'agent est contraint aux limites du Landscape
 
 # Retour
-La fonction retourne la position de l`agent modifiée.
+La fonction retourne la position de l\'agent modifiée.
 """
 function move!(A::Agent, L::Landscape; torus=false)
-    ## Déplacement limité de l`agent
+    ## Déplacement limité de l'agent
     A.x += rand(Int64(-1):Int64(1))
     A.y += rand(Int64(-1):Int64(1))
-    ## Grâce à la fonction torus, si l`agent atteint la bordure du Landscape, il est renvoyé de l’autre côté
+    ## Grâce à la fonction torus, si l'agent atteint la bordure du Landscape, il est renvoyé de l’autre côté
     if torus
         A.y = A.y < L.ymin ? L.ymax : A.y
         A.x = A.x < L.xmin ? L.xmax : A.x
@@ -132,31 +132,31 @@ function move!(A::Agent, L::Landscape; torus=false)
     return A
 end
 
-# Vérifie l`état de l`agent (infectieux ou en santé)
+# Vérifie l'état de l'agent (infectieux ou en santé)
 
 """
     isinfectious(agent::Agent)
 
-Indique si un agent est infectieux ou non à l`aide de valeurs Booléennes.
+Indique si un agent est infectieux ou non à l\'aide de valeurs Booléennes.
 
 # Arguments 
-`agent::Agent` : identité de l`agent dont on vérifie l`état d`infection
+agent::Agent : identité de l\'agent dont on vérifie l\'état d\'infection
 
 # Retour
-La fonction retourne une valeur Booléennes : `true` si l`agent est infectieux, `false` si non.
+La fonction retourne une valeur Booléennes : true si l\'agent est infectieux, false si non.
 """
 isinfectious(agent::Agent) = agent.infectious
 
 """
     ishealthy(agent::Agent)
 
-Indique si un agent est sain ou non à l`aide de valeurs Booléennes, en comparant l`état de l`agent au contraire de `agent.infectious`.
+Indique si un agent est sain ou non à l\'aide de valeurs Booléennes, en comparant l\'état de l\'agent au contraire de \'agent.infectious\'.
 
 # Arguments 
-`agent::Agent` : identité de l`agent dont on vérifie l`état d`infection
+agent::Agent : identité de l\'agent dont on vérifie l\'état d\'infection
 
 # Retour
-La fonction retourne une valeur Booléennes : `true` si `agent.infectious == false`, `false` si `agent.infectious == true`.
+La fonction retourne une valeur Booléennes : true si agent.infectious == false, false si agent.infectious == true.
 """
 ishealthy(agent::Agent) = !agent.infectious
 
@@ -165,11 +165,11 @@ ishealthy(agent::Agent) = !agent.infectious
 """
     infectious(pop::Population)
 
-Retourne les agents infectieux d`une population en filtrant la population contenant tous les agents pour ne garder que les 
+Retourne les agents infectieux d\'une population en filtrant la population contenant tous les agents pour ne garder que les 
 agents infectieux.
 
 # Arguments 
-`pop::Population` = la population contenant tous les agents (infectieux et sains)
+pop::Population = la population contenant tous les agents (infectieux et sains)
 
 # Retour
 La fonction retourne une collection contenant uniquement les agents infectieux de la population.
@@ -179,11 +179,11 @@ infectious(pop::Population) = filter(isinfectious, pop)
 """
     healthy(pop::Population)
 
-Retourne les agents sains d`une population en filtrant la population contenant tous les agents pour ne garder que les 
+Retourne les agents sains d\'une population en filtrant la population contenant tous les agents pour ne garder que les 
 agents sains.
 
 # Arguments 
-`pop::Population` = la population contenant tous les agents (infectieux et sains)
+pop::Population = la population contenant tous les agents (infectieux et sains)
 
 # Retour
 La fonction retourne une collection contenant uniquement les agents sains de la population.
@@ -196,16 +196,16 @@ healthy(pop::Population) = filter(ishealthy, pop)
 """
     incell(target::Agent, pop::Population)
 
-Identifie un agent spécifique, puis vérifie les agents qui occupent la même cellule dans le Landscape que cet agent d`intérêt.
+Identifie un agent spécifique, puis vérifie les agents qui occupent la même cellule dans le Landscape que cet agent d\'intérêt.
 La fonction retourne ensuite toutes les positions sur les axes x et y de ces agents.
 
 # Arguments 
-`target::Agent` : un agent spécifique à qui la fonction compare la position avec les autres agents de la population
-`pop::Population` : la population contenant tous les agents (infectieux et sains)
+target::Agent : un agent spécifique à qui la fonction compare la position avec les autres agents de la population
+pop::Population : la population contenant tous les agents (infectieux et sains)
 
 # Retour
 La fonction retourne une collection contenant uniquement les agents dont les coordonnées sur les axes x et y sont les même
-    que l`agent `target`.
+    que l\'agent target.
 """
 incell(target::Agent, pop::Population) = filter(ag -> (ag.x == target.x && ag.y == target.y), pop)
 
@@ -217,38 +217,38 @@ incell(target::Agent, pop::Population) = filter(ag -> (ag.x == target.x && ag.y 
 # Description 
 1. La fonction établie le Landscape dans lequel la population évolue.
 2. Génération de la population contenant tous les agents au départ. 
-3. Échantillonnage d`un individu spécifique qui sera le premier individu infectieux.
+3. Échantillonnage d\'un individu spécifique qui sera le premier individu infectieux.
 4. Établissement du budget de départ et des coûts relier aux interventions.
 5. À chaque tick, ou pas de temps, les agents de la population subissent un déplacement, 
     des agents infectieux sont choisi, la propagation de la maladie est générée et une
-    horloge interne de 21 jours est initié qui décompte le temps avant qu`un agent infectieux
+    horloge interne de 21 jours est initié qui décompte le temps avant qu\'un agent infectieux
     meurt.
 6. Les agents qui meurt à la fin du délai de 21 jours sont supprimés de la population.
-7. L`intervention est simulée : une groupe de 20 agents sont sélectionnés aléatoirement,
+7. L\'intervention est simulée : une groupe de 20 agents sont sélectionnés aléatoirement,
     ils se font tester et certains se font vacciner.
 
 # Arguments ou keywords 
-`maxlength::Int64=1000` : nombre maximal de ticks ou pas de temps simulés
-`population_size::Int64=3750` : taille de la population initiale 
-`intervention=true` : active ou non l`intervention. Si `true`, l`intervention est activée et les RAT et la vaccination sont mis en place.
-    Si `false`, l`intervention n`a pas lieu.
+maxlength::Int64=1000 : nombre maximal de ticks ou pas de temps simulés
+population_size::Int64=3750 : taille de la population initiale 
+intervention=true : active ou non l\'intervention. Si true, l\'intervention est activée et les RAT et la vaccination sont mis en place.
+    Si false, l\'intervention n\'a pas lieu.
 
 # Retour
-La fonction retourne retourne un `NamedTuple` qui contient:
-    - `tick` = le nombre total de ticks simulés
-    - `S` = historique desvagents sains
-    - `I` = historique des agents infectieux
-    - `D` = historique des morts cumulées
-    - `V` = historique des agents vaccinés
-    - `budget_hist` = l`historique du budget
-    - `morts_totaux` = nombre total de morts
-    - `budget_restant` = montant restant du budget initial
-    - `survivants` = nombre d`agents restant dans la population
-    - `events` = historique des évènements d`infection
+La fonction retourne retourne un NamedTuple qui contient:
+    - tick = le nombre total de ticks simulés
+    - S = historique desvagents sains
+    - I = historique des agents infectieux
+    - D = historique des morts cumulées
+    - V = historique des agents vaccinés
+    - budget_hist = l\'historique du budget
+    - morts_totaux = nombre total de morts
+    - budget_restant' = montant restant du budget initial
+    - survivants = nombre d\'agents restant dans la population
+    - events = historique des évènements d\'infection
 """
 function simulation(; maxlength::Int64=1000, population_size::Int64=3750, intervention=true)
     L = Landscape()
-    ## Un agent est choisi au hasard pour qu`il soit infectieux au départ
+    ## Un agent est choisi au hasard pour qu'il soit infectieux au départ
     population = [rand(Agent, L) for _ in 1:population_size]
     rand(population).infectious = true
 
@@ -284,9 +284,9 @@ function simulation(; maxlength::Int64=1000, population_size::Int64=3750, interv
             for v in neighbors
                 est_protege = v.vaccinated && v.vax_timer <= 0
                 if !est_protege && !v.infectious && rand() <= 0.4
-                    ## Si non protégé, non infectieux et probabilité < 0.4, l`agent devient infectieux
+                    ## Si non protégé, non infectieux et probabilité < 0.4, l'agent devient infectieux
                     v.infectious = true
-                    ## Durée de l`infection et enregistrement de l`événement
+                    ## Durée de l'infection et enregistrement de l'événement
                     v.clock = 21 
                     push!(events, InfectionEvent(
                         from = agent.id,
@@ -299,14 +299,14 @@ function simulation(; maxlength::Int64=1000, population_size::Int64=3750, interv
             end
         end
 
-        ## Délai avant l`effet du vaccin
+        ## Délai avant l'effet du vaccin
         for agent in population
             if agent.vaccinated && agent.vax_timer > 0
                 agent.vax_timer -= 1
             end
         end
 
-        ## Compte à rebours jusqu`à la mort
+        ## Compte à rebours jusqu'à la mort
         for agent in population
             est_protege = agent.vaccinated && agent.vax_timer <= 0
             if agent.infectious && !est_protege
@@ -371,29 +371,29 @@ end
 """
     replicate_simulations(nrep::Int64; intervention=true)
 
-La fonction effectue plusieurs répétition de la simulation d`infection et collecte des
-statistiques pour l`analyse.
+La fonction effectue plusieurs répétition de la simulation d\'infection et collecte des
+statistiques pour l\'analyse.
 
 # Arguments 
-`nrep::Int6` : nombre de répétitions de la simulation à effectuer
-`intervention=true` : active ou non l`intervention. Si `true`, l`intervention est activée et les RAT et la vaccination sont mis en place.
-    Si `false`, l`intervention n`a pas lieu.
+nrep::Int6 : nombre de répétitions de la simulation à effectuer
+intervention=true : active ou non l\'intervention. Si true, l\'intervention est activée et les RAT et la vaccination sont mis en place.
+    Si false, l\'intervention n\'a pas lieu.
 
 # Retour
-La fonction retourne retourne un `NamedTuple` qui contient:
-    - `results` : résultats complets de chaque simulation
-    - `morts` : nombre total de morts par simulation
-    - `survivants` : nombre de survivants par simulation
-    - `budgets` : budgets dépensés par simulation
-    - `durations` : durées de chaque simulation (en nombre de tick)
-    - `mean_morts` : moyenne du nombre de morts
-    - `std_morts` : écart-type du nombre de morts
-    - `mean_survivants` : moyenne du nombre de survivants
-    - `std_survivants` : écart-type des survivants
-    - `mean_budget` : moyenne du budget dépensé
-    - `std_budget` : écart-type du budget dépensé
-    - `mean_duration` : durée moyenne des simulations
-    - `std_duration` : écart-type de la durée des simulations
+La fonction retourne retourne un NamedTuple qui contient:
+    - results : résultats complets de chaque simulation
+    - morts : nombre total de morts par simulation
+    - survivants : nombre de survivants par simulation
+    - budgets : budgets dépensés par simulation
+    - durations : durées de chaque simulation (en nombre de tick)
+    - mean_morts : moyenne du nombre de morts
+    - std_morts : écart-type du nombre de morts
+    - mean_survivants : moyenne du nombre de survivants
+    - std_survivants : écart-type des survivants
+    - mean_budget : moyenne du budget dépensé
+    - std_budget : écart-type du budget dépensé
+    - mean_duration : durée moyenne des simulations
+    - std_duration : écart-type de la durée des simulations
 """
 function replicate_simulations(nrep::Int64; intervention=true)
     results = [simulation(intervention=intervention) for _ in 1:nrep]
@@ -486,7 +486,7 @@ scatter!(ax3, 1:length(rep_avec.morts), rep_avec.morts, label="Avec intervention
 axislegend(ax3)
 current_figure()
 
-# Graphiques basés sur les événements d`infection
+# Graphiques basés sur les événements d'infection
 
 if !isempty(events)
     infxn_by_uuid = countmap(getfield.(events, :from))
@@ -604,9 +604,9 @@ current_figure()
 # 9. Plotting
 # Ajout : plots V/D, budget, hotspots, propagation x/y
 
-# On peut aussi citer des références dans le document `references.bib`, qui doit
+# On peut aussi citer des références dans le document 'references.bib', qui doit
 # être au format BibTeX. Les références peuvent être citées dans le texte avec
-# `@` suivi de la clé de citation. Par exemple: ermentrout1993cellular -- la
+# '@' suivi de la clé de citation. Par exemple: ermentrout1993cellular -- la
 # bibliographie sera ajoutée automatiquement à la fin du document.
 
 # Le format de la bibliographie est American Physics Society, et les références
