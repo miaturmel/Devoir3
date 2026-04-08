@@ -100,7 +100,7 @@ Random.rand(::Type{Agent}, L::Landscape) = Agent(
 
 Déplace un agent aléatoirement d'un pas de taille 1 dans les deux dimension x et y. 
 Le sens du déplacement est aléatoirement défini entre -1 et 1 sur les deux axes.
-L'argument "torus", si activé, permet que l'agent réapparaît de l'autre côté de la Lattice
+L'argument 'torus', si activé, permet que l'agent réapparaît de l'autre côté de la Lattice
 s'il en dépasse les bordures. 
 
 # Arguments 
@@ -205,7 +205,7 @@ La fonction retourne ensuite toutes les positions sur les axes x et y de ces age
 
 # Retour
 La fonction retourne une collection contenant uniquement les agents dont les coordonnées sur les axes x et y sont les même
-    que l'agent "target".
+    que l'agent 'target'.
 """
 incell(target::Agent, pop::Population) = filter(ag -> (ag.x == target.x && ag.y == target.y), pop)
 
