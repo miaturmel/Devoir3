@@ -17,9 +17,64 @@
 # ---
 
 # # Introduction
+# Une épidémie est définie par une augmentation anormale du nombre de cas d’une même # infection au sein d’une population, 
+# sur une période donnée (ifrcepidemics2022). Elle est le résultat de la propagation de germes comme de virus, de bactéries ou encore de 
+# parasites qui peuvent se transmettre d’un individu à un autre de manière directe, par 
+# exemple : par le contact physique ou par les fluides de la personne infectée ou indirecte, 
+# par exemple : l’air, des objets contaminés, la nourriture, l’eau ou encore des vecteurs, 
+# soit des insectes ou animaux (ifrcepidemics2022). La façon par laquelle une maladie se
+# propage dépend de plusieurs facteurs, comme : la gravité et la persistance de la maladie, 
+# son apparition pour la première fois au sein d’une population, l’apparition de vecteurs et 
+# leur quantité, l’état de santé de la population, le contact entre les personnes ainsi que le 
+# nombre de personnes étant vaccinés (ifrcepidemics2022). Dans certaines situations, il 
+# existe des individus pouvant être asymptomatiques, mais tout de même contagieux qui
+# peuvent transmettre la maladie sans le savoir. Cela constitue un problème qui rend la
+# détection et le contrôle d’une épidémie plus difficile. Pour limiter la propagation, il existe 
+# des interventions de santé publique possibles pouvant être mises en place, comme la 
+# vaccination ou le dépistage. Cependant, ces interventions ont des contraintes liées aux
+# ressources limitées, ce qui impose de faire des choix stratégiques pour leur 
+# utilisation.
+# Dans cette simulation, la maladie étudiée est transmissible, asymptomatique et toujours
+# fatale en l’absence de protection. Cette maladie touche une population de 3740 individus
+# n’ayant jamais été confrontée à la maladie étudiée, ils ne sont donc pas immunisés. Donc,
+# dans ce contexte biologique, comment l’utilisation de tests de dépistage et de la 
+# vaccination, sous contrainte budgétaire, influence-t-elle la propagation de l’épidémie et 
+# le nombre total de décès dans la population atteinte? Cette simulation permettra donc de
+# modéliser la propagation spatiale d’une infection ainsi que l’utilité des méthodes
+# d’intervention, comme le dépistage et les vaccins. La première hypothèse posée sur ce
+# modèle est que, sans aucune intervention, l’épidémie pourrait se propager rapidement à
+# l’ensemble de la population, entraînant une mortalité très élevée parce que cette maladie
+# est asymptomatique et fatale lorsqu’elle est contractée. La deuxième hypothèse est que
+# l’introduction d’interventions (dépistages et vaccination) permettra de réduire
+# significativement propagation et mortalité de la population. En effet, le dépistage va
+# permettre d’identifier les individus infectieux et la vaccination protégera les individus
+# sains contre l’infection. La troisième hypothèse est que l’efficacité des interventions va
+# fortement dépendre de la gestion du budget de 21000$ disponible pour les vaccins (17$)
+# et le dépistage (4$) pour une population de 3750 individus. En effet, si le budget était
+# réparti équitablement entre tous les membres de cette population, chaque personne
+# n’aurait que 5,60$, juste assez pour payer un seul dépistage. Dans la simulation
+# d’épidémies, on s’attend donc à voir une plus grande mortalité dans la population
+# lorsqu’il y a peu ou pas d’interventions et, au contraire, lorsque les interventions
+# augmentent, le taux de propagation et mortalité diminue dans la population.
+
 
 # # Présentation du modèle
- 
+# ## Description du modèle :
+
+# ## Suppositions du modèle :
+# -La population initiale est entièrement n’est pas immunisé
+# -Le taux d’infection est de 0.4 
+# -La durée de la maladie est de 21 jours et est toujours fatale 
+# -Les individus infectieux sont asymptomatiques. 
+# -La transmission dépend uniquement des contacts entre les individus de la population fermée 
+# -Le vaccin ne s’active qu’après deux jours suivant son inoculation
+# -Le vaccin protège complètement un individu de la maladie 
+# -Les tests de dépistage antigéniques ont une efficacité de 95%, mais ne permettent pas de savoir depuis quand un individu est infectieux
+# -Les ressources sont limitées par un budget fixe de 21000$ pour l’ensemble de la population. 
+# -Les vaccins coûtent 17$ chacun 
+# -Les tests de dépistage coutent 4$ chacun
+# -La seule façon de connaître la prévalence de la maladie est par le moyen des tests 
+
 # # Implémentation
 
 # ## Les packages nécessaires pour simuler le code.
