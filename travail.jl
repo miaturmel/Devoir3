@@ -69,18 +69,18 @@
 # La simulation se déroule sur un paysage de 100x100 unités, où les individus se déplacent aléatoirement à chaque génération. 
 
 # ## Suppositions du modèle :
-# -La population initiale n’est pas immunisé
-# -Le taux d’infection est de 0.4 
-# -La durée de la maladie est de 21 jours et est toujours fatale 
-# -Les individus infectieux sont asymptomatiques. 
-# -La transmission dépend uniquement des contacts entre les individus de la population fermée 
-# -Le vaccin ne s’active qu’après deux jours suivant son inoculation
-# -Le vaccin protège complètement un individu de la maladie 
-# -Les tests de dépistage antigéniques ont une efficacité de 95%, mais ne permettent pas de savoir depuis quand un individu est infectieux
-# -Les ressources sont limitées par un budget fixe de 21000$ pour l’ensemble de la population. 
-# -Les vaccins coûtent 17$ chacun 
-# -Les tests de dépistage coutent 4$ chacun
-# -La seule façon de connaître la prévalence de la maladie est par le moyen des tests 
+# - La population initiale n’est pas immunisé
+# - Le taux d’infection est de 0.4 
+# - La durée de la maladie est de 21 jours et est toujours fatale 
+# - Les individus infectieux sont asymptomatiques. 
+# - La transmission dépend uniquement des contacts entre les individus de la population fermée 
+# - Le vaccin ne s’active qu’après deux jours suivant son inoculation
+# - Le vaccin protège complètement un individu de la maladie 
+# - Les tests de dépistage antigéniques ont une efficacité de 95%, mais ne permettent pas de savoir depuis quand un individu est infectieux
+# - Les ressources sont limitées par un budget fixe de 21000$ pour l’ensemble de la population. 
+# - Les vaccins coûtent 17$ chacun 
+# - Les tests de dépistage coutent 4$ chacun
+# - La seule façon de connaître la prévalence de la maladie est par le moyen des tests 
 
 # ## Notre modèle de vaccination :
 # Une intervention dans la population n'est possible que s’il y a au moins 1 mort résultant de la maladie dans la population, 
