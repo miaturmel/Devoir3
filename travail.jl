@@ -549,6 +549,9 @@ ax3 = Axis(f3[1, 1],
 )
 scatter!(ax3, 1:length(rep_sans.morts), rep_sans.morts, label="Sans intervention")
 scatter!(ax3, 1:length(rep_avec.morts), rep_avec.morts, label="Avec intervention")
+
+# ylims!(ax3, 1, 10) ## zoom sur le graphique pour voir le nombre minimal de morts
+
 axislegend(ax3)
 current_figure()
 
@@ -711,40 +714,100 @@ current_figure()
 # 100% dans notre intervention et d'identifier tous les agents infectieux avec certitude.
 
 # Finalement, la lattice originale dans le code avait des bornes sur les deux axes de -25 à 25, tandis que dans la simulation présentée ici, ces
-# bornes sont plutôt de -50 à 50. ????
+# bornes sont plutôt de -50 à 50. Une matrice plus petite ferait que l'infection se propage beaucoup plus vite à travers la population. Par exemple, 
+# si on conserverait la lattice de -25 à 25 pour les deux axes, on voit que l'infection se propage à travers toute la lattice dès les premières 
+# générations. Cela fait biologiquement du sens, puisque, une infection se propagerait plus rapidement dans une petite ville où les agents on plus 
+# de chance d'entrer en contact l'un avec l'autre, par exemple. Avec notre lattice plus grande, il est possible d'observer que l'infection ne 
+# s'étale pas sur toute la lattice : on ne la retrouve pas du côté négatif de l'axe des x (voir la figure 5 et 6). Cela pourrait alors représenter 
+# une ville plus étalée où les agents existent avec une certaine distances entre eux et les chances de contacts avec les autres sont plus faible.
 
+# ### 2. Movement
+# Dans la fonction qui code pour les mouvements des agents, nous avons choisi de ne pas générer d'environnement toroïdal par défaut. En effet, nous
+# avons plutôt opté pour un code qui remet les agents sur le bord de la lattice lorsque ceux-ci dépasse les bornes de l'environnement. On peut
+# s'imaginer un envrionnement borné de mur au périmètre.
 
-# 2. Population Generation
-# Changement : génération avec comprehension
+# ### 3. Intervention
+# Comme mentionné ci-haut, les agents sains qui sont vaccinés sont maintentant protégés de l'infection après une inoculation de deux jours. En effet, 
+# on ne vaccine pas les agents qui sont infectieux. Il est alors inévitable que tous ceux qui deviennent infectieux meurts après 21 jours. 
+# Ainsi, l’avenir de la population dépend entièrement du premier évènement d’infection : si le premier agent infectieux se retrouve en contact avec 
+# beaucoup d’autre agents sur sa position initiale, alors la maladie se propagera plus rapidement et la vaccination possible selon le budget s’écoulera 
+# en peu de générations. Par contre, s’il est seul sur sa cellule de départ, la propagation sera plus lente puisqu’il n’infectera pas tout de suite 
+# les autres agents de la population. 
 
-# 3. Movement
-# Changement : torus=false par défaut, clamp
+# Ainsi, l'aspect stochastique de la génération de la position initiale des agents dans la lattice et de leurs déplacements jouent un grand rôle 
+# dans la propagation de l'infection. C'est justement ce qu'il est possible d'observer dans la figure 3 : le nombre de morts varie pour chaque 
+# répétitions de la simulation effectué. Cette figure permet d'observer l'effet de la stochasticité sur la dynamique de l'épidémie. 
 
-# 4. Infection
-# Ajout : Protection vaccin
-# Changement : reset clock à 21
+# L'intervention que nous avons simulée est aussi une source de stochasticité. En effet, la sélection des individu qui seront infectieux et/ou 
+# vaccinés se fait aléatoirement en sélection 20 individu dans la population qui subiront le test. Ce test est fiable à seulement 95% et ces 
+# agents infectieux qui ne seront pas identifier ainsi relèvent aussi du hasard. Ainsi, il est théoriquement possible qu’il n’y ai aucune
+# contamination : le premier individu infectieux dans la population pourrait avoir entré en contact avec aucun de ses voisins pendant les 21
+# jours avant sa mort. Par contre, il est impossible qu’il n’y ai aucune mort, puisque l'intervention ne débute que lorsque ce premier agent meurt
+# Cette situation où le nombre de morts pour la durée complète de la situation n'est de seulement 1 est d'ailleurs représenté dans la figure 3
+# (voir le zoom sur l'axe des y de 0 à 10), tant pour la situation avec et sans intervention.
 
-# 5. Survie / Mortalité
-# Changement : décrément seulement infectieux non protégés
-# Chnagement : suivi morts_totaux
+# Comme mentionné dans l'introduction, le choix de ne tester que 20 individus par jour relève du fait que, la clinique de dépistage et de vaccination
+# pourrait avoir de la place, des ressources et un nombre d'employé limité, ce qui leur permertrait de n'effectué que 20 tests par jour. Le chiffre 
+# arbitraire de 20 fait aussi beaucoup varier la simulation : les agents sélectionnés pourraient tous être sain, donc ils seraient tous vacciner. Si 
+# cette situation se répétait plusieurs fois de suite, le budget s’écoulerait rapidement et la population deviendrait résistante plus rapidement à 
+# la maladie. Au contraire, si les 20 agents qu’on sélectionne pour les tests seraient infectieux,  aucun ne seraient vaccinés, le budget s’écoulerait
+# plus lentement et la population serait plus sensible à la maladie au début de la simulation, car aucun individu ne serait protégé. On verrait ainsi 
+# un nombre de mort élevé dans les premières générations. Cette sélection aléatoire d'agents à tester, combiné avec le fait que nous ne pouvons pas 
+# détecter tous les individus infectieux a qui on administre un test (on admet un 5% d’erreur), fait que, pendant notre campagne de vaccination, 
+# certains agents infectieux n’ont pas été détectés, se sont faufilés dans la population et ont entrés en contact avec des agents susceptibles 
+# pour propager la maladie a perpétuité. 
 
-# 6. Intervention
-# Nouveau : détection RAT + vaccination + budget
+# Pour sauver un plus grand nombre d’agents dans la population, il faudrait alors une autre campagne de vaccination ou apporter une modification à notre 
+# intervention initiale afin qu’elle soit plus spécifique sur les agents choisi à qui administrer un test. Par exemple, les voisins d'un agents infectieux
+# pourraient être testés en priorité. De cette manière, il serait probablement possible de détecter plus d'agents infectieux et ainsi administrer plus de
+# vaccins, ce qui résulterait en un meilleur taux de survie dans la population. Par contre, cette sélection ciblé d'agents qui auront la possibilité de 
+# faire un RAT manquerait un peu de réalisme. En effet, en réalité, les gens qui veulent se faire tester le veulent pour une multitudes de raisons, pas
+# seulement lorsqu'ils ont été en contact avec un voisin atteint d'une infection. Par exemple, quelqu'un pourrait vouloir recevoir un RAT avant d'aller 
+# visiter des membres de sa famille qui serait à risque ou avant de prendre l'avion. Ainsi, puisque notre clinique de vaccination a un nombre limité de 
+# vaccins et de ressources pour administrer ceux-ci, nous avons choisi, dans cette présente simulation, de faire une sélection aléatoire pour donner 
+# des chances égales à tous les agents de la population de se protéger contre maladie.
 
-# 7. Statistiques
-# Ajout : suivi V_count et budget_count
+# Un test qui serait fiable à 100% pourrait aussi aider à mieux gérer les ressources disponibles pour la campagne de
+# vaccination, puisque ainsi, aucun test ne serait gaspillé. En revanche, comme mentionné plus tôt, cette proposition manque un peu de réalisme.
 
-# 8. Réplications
-# Nouveau : réplications + moyennes/écarts-types
+# ### 4. Budget
+# L'ajout d'un budget au code initial instaure aussi une autre limite a l'intervention réalisée. En effet, un budget de 21 000$ était alloué pour une 
+# campagne qui générait des coûts de 4$ par RAT et 17$ par vaccins. Ainsi, une fois le budget épuisé (vers la 100e génération, voir figure 2), il 
+# nous est impossible de détecter ou de vacciner les agents infectieux pour le reste de la simulation. Suite à l’épuisement du budget qui a mis fin à 
+# la campagne de financement, on comprend alors que certains agents sont restés infectieux dans la population et ont pu poursuivre la propagation de la
+# maladie. C’est ce qui explique que le nombre d'agents suscpetibles diminue vers la fin de la simulation dans la figure 1 et que le nombre de morts 
+# augmente, sans toutefois modifier le nombre d’infectieux sur le graphique. 
 
-# 9. Plotting
-# Ajout : plots V/D, budget, hotspots, propagation x/y
+# Il est aussi possible d'observer, dans la figure 1, que le nombre maximal d'agents qui sont vaccinés avant que le budget ne soit écoulé 
+# est d'envrion 1000, ce qui resprésente plus ou moins le tier de la population initiale. Ainsi, avec un plus grand budget, il serait possible
+# d'administrer plus de tests et de vaccins pour possiblement sauver une plus grande portion de la population.
 
-# On peut aussi citer des références dans le document 'references.bib', qui doit
-# être au format BibTeX. Les références peuvent être citées dans le texte avec
-# '@' suivi de la clé de citation. Par exemple: ermentrout1993cellular -- la
-# bibliographie sera ajoutée automatiquement à la fin du document.
+# ### 5. Réplications
+# Nous avons aussi modifié le code initial du modèle en y ajoutant des réplications à la simulation. Cela nous a permis de calculer les écart-types
+# et les moyennes pour les paramètres du nombre de morts, du nombre de survivants, du budget utilisé et de la duréé de la simulation. Il est possible 
+# d'observer que, même avec les réplications, le nombre de survivants dans la simulation avec intervention est toujours nettement plus élevé que le 
+# nombre de survivant pour la simulation sans intervention. Par contre, comme mentionné ci-haut, il est impossible d'obtenir une simulation qui sauve
+# tous les individus de la population. Il est obligatoire d'avoir au moins une mort, ce qui active l'intervention. Ce paramètre qualifie alors cette 
+# simulation d'intervention réactive et non préventive. Contrairement, une intervention préventive pourrait probablement sauver plus d’argents et de 
+# ressources, puisque la campagne de vaccination serait initié avant même l'apparition d'un premier cas dans la population. On pourrait alors imuniser
+# la population à la maladie avant même que cette dernière affecte nos agents. En revanche, il est plus réaliste de faire une intervention réactive. 
+# En effet, dans la vraie vie, il serait probablement impossible de déterminer l’ampleur d’une épidémie avant la première mort si cette maladie est 
+# asymptomatique, comme celle simulée ici (@ifrcepidemics2022).
 
-# Le format de la bibliographie est American Physics Society, et les références
-# seront correctement présentées dans ce format. Vous ne devez/pouvez pas éditer
-# la bibliographie à la main.
+# # Conclusion
+# Pour conclure, il est maintenant possible de répondre aux hypothèses émisent en introduction. 
+
+# Premièrement, il a été confirmé que sans aucune intervention, l'épidémie se propage plus rapidement au sein de la population et cause une mortalité
+# très élevé. Effectivement, avec 30 réplications, les morts moyennes pour une simulation sans intervention sont de (2485.57 ± 996.02) agents, tandis
+# celles pour la simulation avec intervention sont de (627.4 ± 421.22) agents. Ainsi, la maladie qui se propage sans intervention cause la mort
+# de près du 2/3 de la population et une intervention permet, en moyenne, de réduire ce nombre de près de 2000 morts, ce qui confirme d'ailleurs 
+# la deuxième hypothèse émise.
+
+# Deuxièmement, l'hypothèse selon laquelle l'efficacité des interventions dépendra fortement de la gestion du budget est aussi confirmée. Comme 
+# expliqué ci-haut, le budget accordé de 21 000$ pose une limite à l'intervention possible. Lorsque ce budget est atteint, les gens qui ont été 
+# vacciné avant qu'il ne reste plus d'argent seront les seuls protégés contre la maladie au sein de la population. Il a été observé que ce nombre
+# est d'envrion 1000 agents protégés vers la 100e génération dans cette présente simulation. Ainsi, cela laisse approximativement 2500 autres 
+# agents toujours susceptibles à l'infection pour le reste de la simulation (environ 900 autres jours). Bien que notre intervention permet de
+# sauver plus d'agents de la mort qu'une simulation sans intervention, des mesures pourraient être prise pour protéger encore plus d'agents de
+# cette épidémie. Certaines mesures ont, entre autres, été proposées ci-haut : un budget plus large, un test plus fiable, une stratégie de 
+# vaccination plus spécifique, etc.
