@@ -57,6 +57,16 @@
 # lorsqu’il y a peu ou pas d’interventions et, au contraire, lorsque les interventions
 # augmentent, le taux de propagation et mortalité diminue dans la population.
 
+# ## Décisions principales : 
+# - Établissement de la taille du paysage (Landscape) : 100x100 unités
+# - Génération de la population : 3750 individus avec une position aléatoire dans le paysage ainsi que l’état de santé (infectieux ou sain) au départ   
+# - Choix sur la transmission de la maladie
+# - Choix du taux d’infection : 0.4
+# - Choix de la durée de la maladie et ses conséquences
+# - Établissement des propriétés du vaccin
+# - Établissement de l’intervention : dépistage et vaccination, ainsi que les coûts associés et le budget total
+# - Choix de la durée maximale de la simulation 
+# - Échantillonage des résultats : nombre de morts, survivants, budget dépensé, durée de la simulation, etc. pour comparaison entre les simulations avec et sans intervention
 
 # # Présentation du modèle
 # ## Description du modèle :
