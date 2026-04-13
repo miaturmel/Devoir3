@@ -91,6 +91,7 @@
 # de la superficie de la clinique et de la quantité de ressources disponibles, par exemple. Si le budget le permet, nous effectuons ensuite
 # un RAT sur ces 20 agents. En filtrant ensuite les agents infectieux et ceux ayant déjà reçu un vaccin, nous obtenons un sous-groupe d'individus 
 # à partir des 20 sélectionné au départ qui sont sain et non-vacciné et qui sont ceux a qui nous administrerons le vaccins, si le budget le permet.
+
 # ## Décisions principales : 
 # - Établissement de la taille du paysage (Landscape) : 100x100 unités
 # - Génération de la population : 3750 individus avec une position aléatoire dans le paysage ainsi que l’état de santé (infectieux ou sain) au départ   
