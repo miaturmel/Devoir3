@@ -17,16 +17,17 @@
 # ---
 
 # # Introduction
-# Une épidémie est définie par une augmentation anormale du nombre de cas d’une même # infection au sein d’une population, 
-# sur une période donnée (ifrcepidemics2022). Elle est le résultat de la propagation de germes comme de virus, de bactéries ou encore de 
+# Une épidémie est définie par une augmentation anormale du nombre de cas d’une même 
+# infection au sein d’une population, sur une période donnée (@ifrcepidemics2022). 
+# Elle est le résultat de la propagation de germes comme de virus, de bactéries ou encore de 
 # parasites qui peuvent se transmettre d’un individu à un autre de manière directe, par 
 # exemple : par le contact physique ou par les fluides de la personne infectée ou indirecte, 
 # par exemple : l’air, des objets contaminés, la nourriture, l’eau ou encore des vecteurs, 
-# soit des insectes ou animaux (ifrcepidemics2022). La façon par laquelle une maladie se
+# soit des insectes ou animaux (@ifrcepidemics2022). La façon par laquelle une maladie se
 # propage dépend de plusieurs facteurs, comme : la gravité et la persistance de la maladie, 
 # son apparition pour la première fois au sein d’une population, l’apparition de vecteurs et 
 # leur quantité, l’état de santé de la population, le contact entre les personnes ainsi que le 
-# nombre de personnes étant vaccinés (ifrcepidemics2022). Dans certaines situations, il 
+# nombre de personnes étant vaccinés (@ifrcepidemics2022). Dans certaines situations, il 
 # existe des individus pouvant être asymptomatiques, mais tout de même contagieux qui
 # peuvent transmettre la maladie sans le savoir. Cela constitue un problème qui rend la
 # détection et le contrôle d’une épidémie plus difficile. Pour limiter la propagation, il existe 
@@ -34,6 +35,7 @@
 # vaccination ou le dépistage. Cependant, ces interventions ont des contraintes liées aux
 # ressources limitées, ce qui impose de faire des choix stratégiques pour leur 
 # utilisation.
+
 # Dans cette simulation, la maladie étudiée est transmissible, asymptomatique et toujours
 # fatale en l’absence de protection. Cette maladie touche une population de 3740 individus
 # n’ayant jamais été confrontée à la maladie étudiée, ils ne sont donc pas immunisés. Donc,
@@ -67,7 +69,7 @@
 # La simulation se déroule sur un paysage de 100x100 unités, où les individus se déplacent aléatoirement à chaque génération. 
 
 # ## Suppositions du modèle :
-# -La population initiale est entièrement n’est pas immunisé
+# -La population initiale n’est pas immunisé
 # -Le taux d’infection est de 0.4 
 # -La durée de la maladie est de 21 jours et est toujours fatale 
 # -Les individus infectieux sont asymptomatiques. 
@@ -80,6 +82,15 @@
 # -Les tests de dépistage coutent 4$ chacun
 # -La seule façon de connaître la prévalence de la maladie est par le moyen des tests 
 
+# ## Notre modèle de vaccination :
+# Une intervention dans la population n'est possible que s’il y a au moins 1 mort résultant de la maladie dans la population, 
+# s’il reste de l’argent dans le budget pour réaliser des tests et administrer des vaccins et si la population n’est pas vide,
+# c'est-à-dire si pas tous agents sont morts de la maladie. On sélectionne ensuite un maximum de 20 agents aléatoirement et sans remise dans
+# la population à chaque pas de temps. Ainsi, un même individu ne peut pas être sélectionné plus d'une fois pour un dépistage.
+# En effet, à chaque jour, la clinique de vaccination a un nombre limité de rendez-vous disponibles en raison du nombre d'employés limités, 
+# de la superficie de la clinique et de la quantité de ressources disponibles, par exemple. Si le budget le permet, nous effectuons ensuite
+# un RAT sur ces 20 agents. En filtrant ensuite les agents infectieux et ceux ayant déjà reçu un vaccin, nous obtenons un sous-groupe d'individus 
+# à partir des 20 sélectionné au départ qui sont sain et non-vacciné et qui sont ceux a qui nous administrerons le vaccins, si le budget le permet.
 # ## Décisions principales : 
 # - Établissement de la taille du paysage (Landscape) : 100x100 unités
 # - Génération de la population : 3750 individus avec une position aléatoire dans le paysage ainsi que l’état de santé (infectieux ou sain) au départ   
@@ -524,7 +535,7 @@ f1 = Figure(size=(900, 600))
 ax1 = Axis(f1[1, 1],
     xlabel="Génération",
     ylabel="Population",
-    title="Évolution de l'épidémie avec intervention"
+    title="Figure 1 : Évolution de l'épidémie avec intervention"
 )
 stairs!(ax1, 1:length(resultats_avec.S), resultats_avec.S, label="Susceptibles", color=:black)
 stairs!(ax1, 1:length(resultats_avec.I), resultats_avec.I, label="Infectieux", color=:red)
@@ -539,7 +550,7 @@ f2 = Figure(size=(900, 600))
 ax2 = Axis(f2[1, 1],
     xlabel="Génération",
     ylabel="Budget restant (\$)",
-    title="Utilisation du budget pendant l'intervention"
+    title="Figure 2 : Utilisation du budget pendant l'intervention"
 )
 lines!(ax2, 1:length(resultats_avec.budget_hist), resultats_avec.budget_hist, color=:green)
 current_figure()
@@ -550,10 +561,13 @@ f3 = Figure(size=(900, 600))
 ax3 = Axis(f3[1, 1],
     xlabel="Répétition",
     ylabel="Morts totaux",
-    title="Comparaison des morts: sans vs avec intervention"
+    title="Figure 3 : Comparaison des morts: sans vs avec intervention"
 )
 scatter!(ax3, 1:length(rep_sans.morts), rep_sans.morts, label="Sans intervention")
 scatter!(ax3, 1:length(rep_avec.morts), rep_avec.morts, label="Avec intervention")
+
+# ylims!(ax3, 1, 10) ## zoom sur le graphique pour voir le nombre minimal de morts
+
 axislegend(ax3)
 current_figure()
 
@@ -567,7 +581,7 @@ if !isempty(events)
     t = getfield.(events, :time)
     xs = getfield.(events, :x)
     ys = getfield.(events, :y) 
-end
+end;
 
 # Nombre de cas par individu infectieux
 
@@ -575,7 +589,7 @@ f4 = Figure(size=(900, 600))
 ax4 = Axis(f4[1, 1],
     xlabel="Nombre d'infections",
     ylabel="Nombre d'agents",
-    title="Distribution du nombre de cas par individu infectieux"
+    title="Figure 4 : Distribution du nombre de cas par individu infectieux"
     )
 xvals = sort(collect(keys(nb_inxfn)))
 yvals = [nb_inxfn[x] for x in xvals]
@@ -588,7 +602,7 @@ f5 = Figure(size=(900, 600))
 ax5 = Axis(f5[1, 1],
      aspect=1,
     backgroundcolor=:grey97,
-    title="Hotspots des infections"
+    title="Figure 5 : Hotspots des infections"
     )
 hm = scatter!(
     ax5,
@@ -610,7 +624,7 @@ f6 = Figure(size=(900, 600))
 ax6 = Axis(f6[1, 1],
     xlabel="Temps",
     ylabel="Position x",
-    title="Propagation des infections sur l'axe x"
+    title="Figure 6 : Propagation des infections sur l'axe x"
     )
 scatter!(ax6, t, xs, color=:black)
 current_figure()
@@ -621,65 +635,195 @@ f7 = Figure(size=(900, 600))
 ax7 = Axis(f7[1, 1],
     xlabel="Temps",
     ylabel="Position y",
-    title="Propagation des infections sur l'axe y"
+    title="Figure 7 : Propagation des infections sur l'axe y"
     )
 scatter!(ax7, t, ys, color=:black)
 current_figure()
 
 # # Résultats 
 
-# === COMPARAISON SIMPLE ===
-# Sans intervention - morts: 2808
-# Avec intervention - morts: 443
-# Réduction de mortalité: 2365
-# Coût de la campagne: 20999.0
+# ## Comparaison simple 
+# Ce modèle d'épidémie, sans intervention, provoque la mort de 2808 agents, dans une population qui, 
+# originellement, en comptais 3750. Si on active l'intervention dans la population, ce nombre de morts 
+# diminue à 443. Cela représente une diminution de 2365 agents qui ont succombés à la maladie. En revanche,
+# cette campagne représente une dépense de 20 999$. 
 
-# === RÉPLICATIONS (30) ===
-# Sans intervention - morts moyens: 2485.57 ± 996.02
-# Avec intervention - morts moyens: 627.4 ± 421.22
-# Sans intervention - survivants moyens: 1264.43 ± 996.02
-# Avec intervention - survivants moyens: 3122.6 ± 421.22
-# Budget moyen utilisé: 19347.63 ± 5366.95
-# Durée moyenne avec intervention: 748.8 ± 379.38
+# ## Avec réplications
+# Si on ajoute des réplications à la simulation, il est possible de voir l'effet de la stochasticité sur 
+# la simulation et ainsi de calculer des statistiques tel que des moyennes et des écarts-types nos résultats.
+# Par exemple, avec 30 réplications, la simulation sans intervention provoque la mort de (2485.57 ± 996.02) agents
+# en moyenne. Les survivants moyens de cette simulation sans intervention sont ainsi de (1264.43 ± 996.02). Pour la
+# simulation avec intervention, après 30 réplications, le nombre de morts moyens est de (627.4 ± 421.22), ce qui nous donne 
+# (3122.6 ± 421.22) survivants en moyenne. Le budget mmoyen utilisé pour cette intervention est de (19347.63 ± 5366.95)$ et
+# la durée moyenne de l'intervention est de (748.8 ± 379.38) ticks ou pas de temps, avec un maximum de 1000. Cette durée
+# s'arrête lorsque tous les agents de la population ont succombés à la maladie.
+
+# ## Analyse des graphiques
+# ### Figure 1 : Évolution de l'épidémie avec intervention
+# Il est possible de voir qu'au début, tous les agents de la population sont susceptibles, aucun ne sont infectieux, 
+# morts ou vaccinés. La situation restent ainsi pour les dix premières générations environ. Ensuite, on voit l’effet de 
+# l'intervention prendre forme: Les individus sont vaccinés à un rythme très élevé (une centaine de génération environ) 
+# jusqu’à l’atteinte d’un plateau, correspondant à l’épuisement du budget. On en comprend aussi que le début de la campagne 
+# de vaccination correspond à la première mort dans la population : la ligne orange dans le graphique connait une croissance 
+# plus rapide au début (100 premières générations environ). Cette tendance à la croissance positive est suivie par la courbe 
+# d’individus infectieux. Par la suite (après les 100 premieres générations), on voit que les décès cumulés continus d’augmenter 
+# à rythme certes plus lent qu'au départ, tandis que les individus infectieux dans la population sont quasiment inexistant.
+
+# ### Figure 2 : Utilisation du budget pendant l'intervention
+# La figure 2 nous montre justement le moment ou le budget est épuisé. La première utilisation du budget, qui se situe au moins 
+# à la 21e génération correspond, comme on le sait, à la première mort d’un agent suite à la maladie, puisque c'est à ce moment 
+# que l'intervention est déclenchée. Si on assume que le premier agent infecté est infecté dès la première génération, alors il 
+# serait mort à la 21e génération. Le budget s’épuise alors très rapidement et est à sec vers la 100e génération, ce qui confirme 
+# les résultats observés dans la figure 1. 
+
+# ### Figure 3 : Comparaison des morts : sans vs avec intervention
+# Cette figure compare le nombre total de mort générée dans la simulation avec et sans intervention. Il est possible d'observer
+# que généralement, le nombre de mort est beaucoup plus élevé sans intervention qu’avec intervention : l'écart entre les deux 
+# totaux de morts se situe généralement autour de 1000 individus. En revanche, le nombre de mort dans la simulatiion sans intervention
+# ne dépasse généralement pas le 3000 individus. Ainsi, la population n’est jamais anéantie totalement. De plus, il est possible 
+# d’observer qu’à quatre reprises, la simulation sans intervention n’a généré aucune mort.
+
+# ### Figure 4 : Distribution du nombre de cas par individu infectieux
+# Cette figure montre la distribution du nombre de cas initié par chaque individus, c'eat-à dire qu'on vérifie combien de fois un 
+# certain agent a infecté un autre agent. Il est possible d'observer dans la figure que la majorité des agents (environ 150 individus) 
+# ont transmis la maladie environ 2 fois. Environ 70 agents l’ont transmis 3 fois, environ 40 agents l’ont transmis 3 fois et environ 
+# 5 agents l’ont transmis 5 fois. Seulement 1 agent semble avoir transmis la maladie environ 35 fois, ce qui représente le maximum de 
+# fois que la maladie a été transmise.
+
+# ### Figure 5 : Hotspots des infections
+# La figure 5 représente la propagation spatio-temporelle de l’épidémie. Il est alors possible de visualiser la position de l’infection
+# à travers le temps. Il est possible d'observer que les premières infections sont initiées dans le coin haut-droit de la lattice (vers
+# les positions x = 50 et y = 40) et se déplacent ensuite vers le bas de la lattice et vers le coin bas-gauche (vers les positions x = 10
+# et x = 50 et y = -20 et y = -40). Le mouvement que l'infection suit est un mouvement un peu en diagonal.
+
+# ### Figure 6 et 7 : Propagation des infections sur l'axe x et y 
+# Ces figures détaillent les résultats observés dans la figure 5. Il est possible de voir que, au fil du temps, l'infection subit une
+# translation sur l'axe des x, mais restent, pendant toute la durée de la simulation, entre les bornes de x = 5 à x = 50 environ. La
+# lattice est composée d'un axe des x qui se prolonge jusqu'à la borne x = -50, mais l'infection ne semble pas s'y propager (voir figure 6).
+# Cependant, la maladie se propage de façon plus directionnelle sur l'axe des y (Figure 7) : les agents infectieux au début de la simulation 
+# se trouvent du côté positif de l'axe des y, tandis que, vers la fin de la simulation, l'infection est retrouvée du côté négatif de l'axe des y.
 
 # # Discussion
 
-# 1. Types & Structs
-# Changement : clock augmenté de 20 → 21
-# Ajout : vaccinated, vax_timer, is_detected
-# Changement : Lattice ±50 au lieu de ±25
+# ## Modifications du code du modèle
+# ### 1. Types & Structs
+# Initialement, le clock, donc le délai entre l'infection d'un agent et la mort de celui-ci, était de 20 jours. Pour cette simulation, ce
+# délai est augmenté à 21 jours. Ainsi, après l'infection d'un agent, il reste en vie pendant 21 jours puis meurt s'il n'est pas guérit. 
+# En revanche, dans la simulation présenté ici, la guérison est impossible. Une fois qu'un agent est infectieux, celui-ci ne peut pas 
+# redevenir sain; il meurt obligatoirement après 21 jours. 
 
-# 2. Population Generation
-# Changement : génération avec comprehension
+# De plus, dans le code modifié, l'identié de l'agent contient maintenant une option qui indique si l'agent est vacciné, le temps écoulé
+# depuis sa vaccination et indique si l'infection possible de l'agent sera détectée suite à un RAT. Ces changements permettront d'identifier
+# les agents qui pourront recevoir les vaccins dans l'intervention simulée et simuler l'innoculation de deux jours qui active le vaccin. 
+# En effet, le vaccin qu'on instaure dans cette version du modèle, comme décrit dans l'introduction, permet de protéger des agents sain
+# d'une possible infection. Une fois administré, le vaccin n'est effectif que deux jours plus tard. Ainsi, les agents vaccinés depuis moins
+# de deux jours sont encore susceptibles aux infections. L'objet "is_detected" permet de présenter le RAT comme un test plutôt réaliste qui 
+# ne dépiste pas efficacement la maladie 100% du temps. 
 
-# 3. Movement
-# Changement : torus=false par défaut, clamp
+# En effet, le test ne peut pas faire de faux positif, c'eat-à-dire de détecter la maladie si l’agent est sain. Tous les agents sains qui
+# se font tester dans notre clinique en ressortent un test négatif. Cette situation représente une situation idéale, mais manque un peu de 
+# réalisme, puisque, en pratique, les tests rapides pour la détection de maladie peuvent faire des faux-positif. Par exemple, il a été 
+# démontré que les RAT pour la détection de la COVID-19 avait un faible de taux de faux-positif, possiblement lié au moment auquel le test
+# a été effectué (trop tôt ou trop tard dans l'infection) ou la qualité de la réalisation du test (@rhodes1995persistence). Le RAT dans la simulation peut, 
+# par contre, faire des faux négatif, c'est-à-dire identifier un agent comme sain alors qu'il est en fait infecté. On admet 5% de probabilité 
+# pour cette situation dans la simulation. Ce paramètre ajoute du réalisme à la simulation, mais nous empêche, en revanche, d’être efficace à 
+# 100% dans notre intervention et d'identifier tous les agents infectieux avec certitude.
 
-# 4. Infection
-# Ajout : Protection vaccin
-# Changement : reset clock à 21
+# Finalement, la lattice originale dans le code avait des bornes sur les deux axes de -25 à 25, tandis que dans la simulation présentée ici, ces
+# bornes sont plutôt de -50 à 50. Une matrice plus petite ferait que l'infection se propage beaucoup plus vite à travers la population. Par exemple, 
+# si on conserverait la lattice de -25 à 25 pour les deux axes, on voit que l'infection se propage à travers toute la lattice dès les premières 
+# générations. Cela fait biologiquement du sens, puisque, une infection se propagerait plus rapidement dans une petite ville où les agents on plus 
+# de chance d'entrer en contact l'un avec l'autre, par exemple. Avec notre lattice plus grande, il est possible d'observer que l'infection ne 
+# s'étale pas sur toute la lattice : on ne la retrouve pas du côté négatif de l'axe des x (voir la figure 5 et 6). Cela pourrait alors représenter 
+# une ville plus étalée où les agents existent avec une certaine distances entre eux et les chances de contacts avec les autres sont plus faible.
 
-# 5. Survie / Mortalité
-# Changement : décrément seulement infectieux non protégés
-# Chnagement : suivi morts_totaux
+# ### 2. Movement
+# Dans la fonction qui code pour les mouvements des agents, nous avons choisi de ne pas générer d'environnement toroïdal par défaut. En effet, nous
+# avons plutôt opté pour un code qui remet les agents sur le bord de la lattice lorsque ceux-ci dépasse les bornes de l'environnement. On peut
+# s'imaginer un envrionnement borné de mur au périmètre.
 
-# 6. Intervention
-# Nouveau : détection RAT + vaccination + budget
+# ### 3. Intervention
+# Comme mentionné ci-haut, les agents sains qui sont vaccinés sont maintentant protégés de l'infection après une inoculation de deux jours. En effet, 
+# on ne vaccine pas les agents qui sont infectieux. Il est alors inévitable que tous ceux qui deviennent infectieux meurts après 21 jours. 
+# Ainsi, l’avenir de la population dépend entièrement du premier évènement d’infection : si le premier agent infectieux se retrouve en contact avec 
+# beaucoup d’autre agents sur sa position initiale, alors la maladie se propagera plus rapidement et la vaccination possible selon le budget s’écoulera 
+# en peu de générations. Par contre, s’il est seul sur sa cellule de départ, la propagation sera plus lente puisqu’il n’infectera pas tout de suite 
+# les autres agents de la population. 
 
-# 7. Statistiques
-# Ajout : suivi V_count et budget_count
+# Ainsi, l'aspect stochastique de la génération de la position initiale des agents dans la lattice et de leurs déplacements jouent un grand rôle 
+# dans la propagation de l'infection. C'est justement ce qu'il est possible d'observer dans la figure 3 : le nombre de morts varie pour chaque 
+# répétitions de la simulation effectué. Cette figure permet d'observer l'effet de la stochasticité sur la dynamique de l'épidémie. 
 
-# 8. Réplications
-# Nouveau : réplications + moyennes/écarts-types
+# L'intervention que nous avons simulée est aussi une source de stochasticité. En effet, la sélection des individu qui seront infectieux et/ou 
+# vaccinés se fait aléatoirement en sélection 20 individu dans la population qui subiront le test. Ce test est fiable à seulement 95% et ces 
+# agents infectieux qui ne seront pas identifier ainsi relèvent aussi du hasard. Ainsi, il est théoriquement possible qu’il n’y ai aucune
+# contamination : le premier individu infectieux dans la population pourrait avoir entré en contact avec aucun de ses voisins pendant les 21
+# jours avant sa mort. Par contre, il est impossible qu’il n’y ai aucune mort, puisque l'intervention ne débute que lorsque ce premier agent meurt
+# Cette situation où le nombre de morts pour la durée complète de la situation n'est de seulement 1 est d'ailleurs représenté dans la figure 3
+# (voir le zoom sur l'axe des y de 0 à 10), tant pour la situation avec et sans intervention.
 
-# 9. Plotting
-# Ajout : plots V/D, budget, hotspots, propagation x/y
+# Comme mentionné dans l'introduction, le choix de ne tester que 20 individus par jour relève du fait que, la clinique de dépistage et de vaccination
+# pourrait avoir de la place, des ressources et un nombre d'employé limité, ce qui leur permertrait de n'effectué que 20 tests par jour. Le chiffre 
+# arbitraire de 20 fait aussi beaucoup varier la simulation : les agents sélectionnés pourraient tous être sain, donc ils seraient tous vacciner. Si 
+# cette situation se répétait plusieurs fois de suite, le budget s’écoulerait rapidement et la population deviendrait résistante plus rapidement à 
+# la maladie. Au contraire, si les 20 agents qu’on sélectionne pour les tests seraient infectieux,  aucun ne seraient vaccinés, le budget s’écoulerait
+# plus lentement et la population serait plus sensible à la maladie au début de la simulation, car aucun individu ne serait protégé. On verrait ainsi 
+# un nombre de mort élevé dans les premières générations. Cette sélection aléatoire d'agents à tester, combiné avec le fait que nous ne pouvons pas 
+# détecter tous les individus infectieux a qui on administre un test (on admet un 5% d’erreur), fait que, pendant notre campagne de vaccination, 
+# certains agents infectieux n’ont pas été détectés, se sont faufilés dans la population et ont entrés en contact avec des agents susceptibles 
+# pour propager la maladie a perpétuité. 
 
-# On peut aussi citer des références dans le document 'references.bib', qui doit
-# être au format BibTeX. Les références peuvent être citées dans le texte avec
-# '@' suivi de la clé de citation. Par exemple: ermentrout1993cellular -- la
-# bibliographie sera ajoutée automatiquement à la fin du document.
+# Pour sauver un plus grand nombre d’agents dans la population, il faudrait alors une autre campagne de vaccination ou apporter une modification à notre 
+# intervention initiale afin qu’elle soit plus spécifique sur les agents choisi à qui administrer un test. Par exemple, les voisins d'un agents infectieux
+# pourraient être testés en priorité. De cette manière, il serait probablement possible de détecter plus d'agents infectieux et ainsi administrer plus de
+# vaccins, ce qui résulterait en un meilleur taux de survie dans la population. Par contre, cette sélection ciblé d'agents qui auront la possibilité de 
+# faire un RAT manquerait un peu de réalisme. En effet, en réalité, les gens qui veulent se faire tester le veulent pour une multitudes de raisons, pas
+# seulement lorsqu'ils ont été en contact avec un voisin atteint d'une infection. Par exemple, quelqu'un pourrait vouloir recevoir un RAT avant d'aller 
+# visiter des membres de sa famille qui serait à risque ou avant de prendre l'avion. Ainsi, puisque notre clinique de vaccination a un nombre limité de 
+# vaccins et de ressources pour administrer ceux-ci, nous avons choisi, dans cette présente simulation, de faire une sélection aléatoire pour donner 
+# des chances égales à tous les agents de la population de se protéger contre maladie.
 
-# Le format de la bibliographie est American Physics Society, et les références
-# seront correctement présentées dans ce format. Vous ne devez/pouvez pas éditer
-# la bibliographie à la main.
+# Un test qui serait fiable à 100% pourrait aussi aider à mieux gérer les ressources disponibles pour la campagne de
+# vaccination, puisque ainsi, aucun test ne serait gaspillé. En revanche, comme mentionné plus tôt, cette proposition manque un peu de réalisme.
+
+# ### 4. Budget
+# L'ajout d'un budget au code initial instaure aussi une autre limite a l'intervention réalisée. En effet, un budget de 21 000$ était alloué pour une 
+# campagne qui générait des coûts de 4$ par RAT et 17$ par vaccins. Ainsi, une fois le budget épuisé (vers la 100e génération, voir figure 2), il 
+# nous est impossible de détecter ou de vacciner les agents infectieux pour le reste de la simulation. Suite à l’épuisement du budget qui a mis fin à 
+# la campagne de financement, on comprend alors que certains agents sont restés infectieux dans la population et ont pu poursuivre la propagation de la
+# maladie. C’est ce qui explique que le nombre d'agents suscpetibles diminue vers la fin de la simulation dans la figure 1 et que le nombre de morts 
+# augmente, sans toutefois modifier le nombre d’infectieux sur le graphique. 
+
+# Il est aussi possible d'observer, dans la figure 1, que le nombre maximal d'agents qui sont vaccinés avant que le budget ne soit écoulé 
+# est d'envrion 1000, ce qui resprésente plus ou moins le tier de la population initiale. Ainsi, avec un plus grand budget, il serait possible
+# d'administrer plus de tests et de vaccins pour possiblement sauver une plus grande portion de la population.
+
+# ### 5. Réplications
+# Nous avons aussi modifié le code initial du modèle en y ajoutant des réplications à la simulation. Cela nous a permis de calculer les écart-types
+# et les moyennes pour les paramètres du nombre de morts, du nombre de survivants, du budget utilisé et de la duréé de la simulation. Il est possible 
+# d'observer que, même avec les réplications, le nombre de survivants dans la simulation avec intervention est toujours nettement plus élevé que le 
+# nombre de survivant pour la simulation sans intervention. Par contre, comme mentionné ci-haut, il est impossible d'obtenir une simulation qui sauve
+# tous les individus de la population. Il est obligatoire d'avoir au moins une mort, ce qui active l'intervention. Ce paramètre qualifie alors cette 
+# simulation d'intervention réactive et non préventive. Contrairement, une intervention préventive pourrait probablement sauver plus d’argents et de 
+# ressources, puisque la campagne de vaccination serait initié avant même l'apparition d'un premier cas dans la population. On pourrait alors imuniser
+# la population à la maladie avant même que cette dernière affecte nos agents. En revanche, il est plus réaliste de faire une intervention réactive. 
+# En effet, dans la vraie vie, il serait probablement impossible de déterminer l’ampleur d’une épidémie avant la première mort si cette maladie est 
+# asymptomatique, comme celle simulée ici (@ifrcepidemics2022).
+
+# # Conclusion
+# Pour conclure, il est maintenant possible de répondre aux hypothèses émisent en introduction. 
+
+# Premièrement, il a été confirmé que sans aucune intervention, l'épidémie se propage plus rapidement au sein de la population et cause une mortalité
+# très élevé. Effectivement, avec 30 réplications, les morts moyennes pour une simulation sans intervention sont de (2485.57 ± 996.02) agents, tandis
+# celles pour la simulation avec intervention sont de (627.4 ± 421.22) agents. Ainsi, la maladie qui se propage sans intervention cause la mort
+# de près du 2/3 de la population et une intervention permet, en moyenne, de réduire ce nombre de près de 2000 morts, ce qui confirme d'ailleurs 
+# la deuxième hypothèse émise.
+
+# Deuxièmement, l'hypothèse selon laquelle l'efficacité des interventions dépendra fortement de la gestion du budget est aussi confirmée. Comme 
+# expliqué ci-haut, le budget accordé de 21 000$ pose une limite à l'intervention possible. Lorsque ce budget est atteint, les gens qui ont été 
+# vacciné avant qu'il ne reste plus d'argent seront les seuls protégés contre la maladie au sein de la population. Il a été observé que ce nombre
+# est d'envrion 1000 agents protégés vers la 100e génération dans cette présente simulation. Ainsi, cela laisse approximativement 2500 autres 
+# agents toujours susceptibles à l'infection pour le reste de la simulation (environ 900 autres jours). Bien que notre intervention permet de
+# sauver plus d'agents de la mort qu'une simulation sans intervention, des mesures pourraient être prise pour protéger encore plus d'agents de
+# cette épidémie. Certaines mesures ont, entre autres, été proposées ci-haut : un budget plus large, un test plus fiable, une stratégie de 
+# vaccination plus spécifique, etc.
