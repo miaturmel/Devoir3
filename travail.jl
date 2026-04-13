@@ -57,9 +57,14 @@
 # lorsqu’il y a peu ou pas d’interventions et, au contraire, lorsque les interventions
 # augmentent, le taux de propagation et mortalité diminue dans la population.
 
-
 # # Présentation du modèle
 # ## Description du modèle :
+# Dans ce modèle , une épidémie se propage dans une population de 3750 individus à travers des contacts directs entre les individus
+# La maladie est asymptomatique, ce qui signifie que les individus infectieux ne présentent pas de symptômes, mais peuvent tout de même transmettre la maladie à d’autres individus sains.
+# La maladie est également fatale, ce qui signifie que les individus infectieux meurent après une période de 21 jours s’ils ne sont pas protégés par le vaccin.
+# L’intervention consiste en une campagne de dépistage et de vaccination, où un groupe d'individus est sélectionné aléatoirement pour être testé et vacciné si nécessaire cela est nécéssaire.
+# Cependant, il existe une contrainte, soit le budget de 21000$ pour l’ensemble de la population, ce qui limite le nombre de tests et de vaccins pouvant être administrés.
+# La simulation se déroule sur un paysage de 100x100 unités, où les individus se déplacent aléatoirement à chaque génération. 
 
 # ## Suppositions du modèle :
 # -La population initiale est entièrement n’est pas immunisé
